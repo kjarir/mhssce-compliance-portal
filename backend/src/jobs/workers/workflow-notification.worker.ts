@@ -97,10 +97,37 @@ const insertNotification = async (
 };
 
 /**
+ * Fetch full document details including institute name and expiry date.
+ */
+const fetchDocumentDetails = async (documentId: string) => {
+  const { data } = await supabaseAdmin
+    .from("documents")
+    .select("document_name, expiry_date, institutes(name)")
+    .eq("id", documentId)
+    .single();
+
+  const instName = Array.isArray(data?.institutes) 
+    ? (data?.institutes[0] as any)?.name 
+    : (data?.institutes as any)?.name;
+
+  return {
+    documentName: data?.document_name,
+    expiryDate: data?.expiry_date ?? "N/A",
+    instituteName: instName ?? "Anjuman-I-Islam"
+  };
+};
+
+/**
  * Build email HTML for workflow notifications matching the new portal design system.
  */
-const buildEmailHtml = (title: string, message: string, documentName: string): string => {
-  const portalUrl = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+const buildEmailHtml = (
+  title: string,
+  message: string,
+  documentName: string,
+  expiryDate: string = "N/A",
+  instituteName: string = "Anjuman-I-Islam"
+): string => {
+  const portalUrl = process.env.CORS_ORIGIN ?? "https://mhssce-compliance-portal.vercel.app";
   const isWarning = title.toLowerCase().includes("expir") || title.toLowerCase().includes("action");
 
   const badgeBg = isWarning ? "#FFFBEB" : "#ECFDF5";
@@ -120,7 +147,7 @@ const buildEmailHtml = (title: string, message: string, documentName: string): s
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f6f5; padding: 40px 16px;">
           <tr>
             <td align="center">
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 560px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
                 
                 <!-- Header Banner -->
                 <tr>
@@ -128,11 +155,11 @@ const buildEmailHtml = (title: string, message: string, documentName: string): s
                     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td>
-                          <div style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1;">
-                            Anjuman's
+                          <div style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1;">
+                            Anjuman-I-Islam
                           </div>
-                          <div style="font-size: 10px; font-weight: 700; color: #6ee7b7; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">
-                            Compliance Portal
+                          <div style="font-size: 11px; font-weight: 700; color: #6ee7b7; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">
+                            AICP Compliance Portal
                           </div>
                         </td>
                       </tr>
@@ -144,7 +171,7 @@ const buildEmailHtml = (title: string, message: string, documentName: string): s
                 <tr>
                   <td style="padding: 32px;">
                     <!-- Badge -->
-                    <div style="display: inline-block; background-color: ${badgeBg}; border: 1px solid ${badgeBorder}; color: ${badgeColor}; font-size: 11px; font-weight: 700; padding: 4px 12px; rounded-radius: 9999px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;">
+                    <div style="display: inline-block; background-color: ${badgeBg}; border: 1px solid ${badgeBorder}; color: ${badgeColor}; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 18px;">
                       ${badgeText}
                     </div>
 
@@ -159,15 +186,35 @@ const buildEmailHtml = (title: string, message: string, documentName: string): s
                     </p>
 
                     <!-- Document Information Card -->
-                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
                       <tr>
                         <td>
-                          <div style="font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                          <div style="font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
                             Document Title
                           </div>
-                          <div style="font-size: 15px; font-weight: 700; color: #111827;">
+                          <div style="font-size: 15px; font-weight: 800; color: #111827; margin-bottom: 12px;">
                             ${documentName}
                           </div>
+                          <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                              <td width="50%">
+                                <div style="font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                                  Institute / College
+                                </div>
+                                <div style="font-size: 13px; font-weight: 600; color: #374151;">
+                                  ${instituteName}
+                                </div>
+                              </td>
+                              <td width="50%">
+                                <div style="font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                                  Expiration Date
+                                </div>
+                                <div style="font-size: 13px; font-weight: 700; color: #dc2626;">
+                                  ${expiryDate}
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                     </table>
@@ -188,7 +235,7 @@ const buildEmailHtml = (title: string, message: string, documentName: string): s
                 <!-- Footer -->
                 <tr>
                   <td style="background-color: #f9fafb; border-top: 1px solid #f3f4f6; padding: 20px 32px; text-align: center;">
-                    <p style="margin: 0; font-size: 12px; font-weight: 500; color: #9ca3af;">
+                    <p style="margin: 0; font-size: 11px; font-weight: 500; color: #9ca3af;">
                       This is an automated notification from Anjuman's AICP Compliance Portal.
                     </p>
                   </td>
@@ -211,6 +258,11 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
     "Processing workflow notification"
   );
 
+  const docDetails = await fetchDocumentDetails(documentId);
+  const actualDocName = docDetails.documentName ?? documentName;
+  const expiryDate = docDetails.expiryDate;
+  const instituteName = docDetails.instituteName;
+
   let recipients: UserRow[] = [];
   let title: string;
   let message: string;
@@ -218,18 +270,14 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
 
   switch (event) {
     case "document_uploaded": {
+      // 1. Upload Event -> Clerk + HOD + Principal all get notified
       recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal", "Admin"]);
       const uploader = await fetchUploader(documentId);
       if (uploader) {
         recipients.push(uploader);
       }
-      // If still no recipients found for institute, fetch all Admins portal-wide
-      if (recipients.length === 0) {
-        const { data: globalAdmins } = await supabaseAdmin.from("users").select("id, full_name, role").eq("role", "Admin");
-        recipients.push(...(globalAdmins ?? []));
-      }
       title = "New Document Uploaded";
-      message = `${actorName} (${actorRole}) has uploaded "${documentName}" for review.`;
+      message = `${actorName} (${actorRole}) has uploaded "${actualDocName}" for review.`;
       notificationType = "upload";
       break;
     }
@@ -241,20 +289,42 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
         recipients.push(uploader);
       }
       title = "Document Renewal Submitted";
-      message = `${actorName} (${actorRole}) has submitted a renewal for "${documentName}". It is awaiting your review.`;
+      message = `${actorName} (${actorRole}) has submitted a renewal for "${actualDocName}". It is awaiting your review.`;
       notificationType = "renewal";
       break;
     }
 
     case "document_expiring": {
-      recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal"]);
+      const milestoneDays = data.milestoneDays ?? 30;
+
+      // Tiered Escalation Hierarchy:
+      // Milestone >= 30 days (1 Month): Notify Clerk only
+      // Milestone 14 to 29 days (2 Weeks): Escalation Tier 2 -> Notify Clerk + HOD
+      // Milestone < 14 days (Critical/Expired): Escalation Tier 3 -> Notify Clerk + HOD + Principal
       const uploader = await fetchUploader(documentId);
-      if (uploader) {
-        recipients.push(uploader);
+
+      if (milestoneDays > 14) {
+        // Tier 1 (1 Month / > 2 Weeks): Clerk only
+        if (uploader) recipients.push(uploader);
+        title = "Expiration Warning (1 Month Remaining)";
+        message = `"${actualDocName}" will expire on ${expiryDate} (${milestoneDays} days remaining). Please prepare renewal files.`;
+      } else if (milestoneDays > 7) {
+        // Tier 2 (2 Weeks): Clerk + HOD
+        if (uploader) recipients.push(uploader);
+        const hods = await fetchUsersByRole(instituteId, ["HOD"]);
+        recipients.push(...hods);
+        title = "ESCALATION: Expiration Warning (2 Weeks Remaining)";
+        message = `Attention HOD & Clerk: "${actualDocName}" will expire on ${expiryDate} (${milestoneDays} days remaining). Action is urgently required.`;
+      } else {
+        // Tier 3 (< 1 Week / Urgent): Clerk + HOD + Principal
+        if (uploader) recipients.push(uploader);
+        const hods = await fetchUsersByRole(instituteId, ["HOD"]);
+        const principals = await fetchUsersByRole(instituteId, ["Principal"]);
+        recipients.push(...hods, ...principals);
+        title = "URGENT ESCALATION: Document Expiring / Expired";
+        message = `URGENT NOTICE to Principal, HOD & Clerk: "${actualDocName}" is expiring on ${expiryDate} (${milestoneDays <= 0 ? 'ALREADY EXPIRED' : milestoneDays + ' days remaining'}). Immediate review required.`;
       }
-      const milestoneDays = data.milestoneDays ?? 0;
-      title = "Action Required: Document Expiring";
-      message = `"${documentName}" is expiring in ${milestoneDays} ${milestoneDays === 1 ? 'day' : 'days'} (or is already expired). Please take action to renew it.`;
+
       notificationType = "expiry_warning";
       break;
     }
@@ -305,12 +375,14 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
     const email = await fetchUserEmail(recipient.id);
     if (email) {
       try {
-        const html = buildEmailHtml(title, message, documentName);
+        const html = buildEmailHtml(title, message, actualDocName, expiryDate, instituteName);
         await sendWorkflowEmail(email, `[AICP] ${title}`, html, {
           recipientName: recipient.full_name,
           badgeText: title.toLowerCase().includes("expir") ? "ACTION REQUIRED" : "COMPLIANCE NOTICE",
           message,
-          documentName
+          documentName: actualDocName,
+          instituteName,
+          expiryDate
         });
         emailsSent++;
       } catch {

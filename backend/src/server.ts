@@ -6,6 +6,15 @@ import { seedInitialData } from "./scripts/seed";
 const server = app.listen(env.PORT, async () => {
   logger.info(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
   await seedInitialData();
+
+  // In production (Render free tier), start worker in-process if configured
+  try {
+    const { createWorkflowNotificationWorker } = await import("./jobs/workers/workflow-notification.worker");
+    createWorkflowNotificationWorker();
+    logger.info("In-process BullMQ Workflow Notification Worker started successfully");
+  } catch (workerErr) {
+    logger.warn({ error: workerErr instanceof Error ? workerErr.message : "Unknown" }, "In-process worker initialization skipped (Redis offline / separate worker mode)");
+  }
 });
 
 const shutdown = (signal: string) => {

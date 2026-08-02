@@ -7,17 +7,21 @@ const server = app.listen(env.PORT, async () => {
   logger.info(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
   await seedInitialData();
 
-  // In production (Render free tier without Redis server), only initialize BullMQ worker if REDIS_URL is explicitly set to a remote server
-  if (env.REDIS_URL && !env.REDIS_URL.includes("127.0.0.1") && !env.REDIS_URL.includes("localhost")) {
-    try {
-      const { createWorkflowNotificationWorker } = await import("./jobs/workers/workflow-notification.worker");
-      createWorkflowNotificationWorker();
-      logger.info("BullMQ Workflow Notification Worker started");
-    } catch (workerErr) {
-      logger.warn("Worker setup skipped");
-    }
-  } else {
-    logger.info("Using Direct In-Process Direct Dispatcher for EmailJS/SMTP (Redis disabled)");
+  // Run daily expiry check upon boot & schedule in-process hourly check
+  try {
+    const { runDailyExpiryCheck } = await import("./jobs/services/expiry-check.service");
+    runDailyExpiryCheck()
+      .then((res) => logger.info(res, "Initial boot document expiry check completed"))
+      .catch((err) => logger.warn({ error: err.message }, "Boot expiry check failed"));
+
+    // Schedule hourly check in-process (runs automatically every 60 mins without needing Redis)
+    setInterval(() => {
+      runDailyExpiryCheck()
+        .then((res) => logger.info(res, "Scheduled hourly document expiry check completed"))
+        .catch((err) => logger.warn({ error: err.message }, "Scheduled expiry check error"));
+    }, 60 * 60 * 1000);
+  } catch (err) {
+    logger.warn("Expiry checker initialization skipped");
   }
 });
 

@@ -218,24 +218,22 @@ export const runDailyExpiryCheck = async (): Promise<{
        continue;
     }
 
-    // ── Step 4: Queue a single workflow notification per institute ──
-    // The workflow worker will resolve all HOD/Principals logic internally and batch emails
-    const { workflowNotificationQueue } = await import("../queues");
-    
-    await workflowNotificationQueue.add(
-      "workflow-notification",
-      {
-         event: "document_expiring",
-         documentId: doc.id,
-         documentName: doc.document_name,
-         instituteId: doc.institute_id,
-         actorName: "System",
-         actorRole: "System",
-         milestoneDays: milestoneParams.days
-      }
-    );
-
-    notificationsQueued += 1;
+    // ── Step 4: Directly dispatch workflow notification (in-process) ──
+    try {
+      const { processWorkflowNotification } = await import("../workers/workflow-notification.worker");
+      await processWorkflowNotification({
+        event: "document_expiring",
+        documentId: doc.id,
+        documentName: doc.document_name,
+        instituteId: doc.institute_id,
+        actorName: "System",
+        actorRole: "System",
+        milestoneDays: milestoneParams.days
+      });
+      notificationsQueued += 1;
+    } catch (err) {
+      logger.error({ error: err instanceof Error ? err.message : "Unknown" }, "Failed to process workflow notification for expiring doc");
+    }
 
     logger.info(
       {

@@ -142,6 +142,9 @@ const ApprovalsPage = () => {
       setFeedbackMap({});
       setExpandedDoc(null);
     },
+    onError: (err: any) => {
+      alert(err instanceof Error ? err.message : 'Failed to submit approval review');
+    },
   });
 
   const reviewRenewalMutation = useMutation({
@@ -155,6 +158,9 @@ const ApprovalsPage = () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       setFeedbackMap({});
       setExpandedDoc(null);
+    },
+    onError: (err: any) => {
+      alert(err instanceof Error ? err.message : 'Failed to review document renewal');
     },
   });
 

@@ -95,7 +95,7 @@ const ApprovalsPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('document_renewals')
-        .select('*, documents(document_name, institute_id, file_path, institutes(name)), users:uploader_id(full_name)')
+        .select('*, documents:document_id(id, document_name, institute_id, file_path, institutes(name)), users:uploader_id(full_name)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -410,10 +410,13 @@ const ApprovalsPage = () => {
               </div>
             )}
 
-            {renewals.map((renewal) => {
-              const docName = renewal.documents?.document_name ?? 'Unknown Document';
-              const instName = renewal.documents?.institutes?.name ?? 'Unknown Institute';
-              const uploaderName = renewal.users?.full_name ?? 'Clerk';
+            {renewals.map((renewal: any) => {
+              const docObj = Array.isArray(renewal.documents) ? renewal.documents[0] : renewal.documents;
+              const instObj = docObj?.institutes;
+              const instName = Array.isArray(instObj) ? instObj[0]?.name : instObj?.name;
+              const docName = docObj?.document_name ?? 'Compliance Document';
+              const displayInst = instName ?? 'M.H. Saboo Siddik College of Engineering';
+              const uploaderName = (Array.isArray(renewal.users) ? renewal.users[0]?.full_name : renewal.users?.full_name) ?? 'Clerk';
               const isExpanded = expandedDoc === renewal.id;
               const feedbackText = feedbackMap[renewal.id] ?? '';
 
@@ -422,7 +425,7 @@ const ApprovalsPage = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 text-sm mb-0.5">{docName} <span className="text-amber-700 italic text-xs">(Renewal)</span></h3>
-                      <p className="text-xs font-semibold text-emerald-800">{instName}</p>
+                      <p className="text-xs font-semibold text-emerald-800">{displayInst}</p>
                       <p className="text-[11px] text-gray-400 mt-1">
                         Uploaded by <span className="font-bold text-gray-700">{uploaderName}</span> on{' '}
                         {new Date(renewal.created_at).toLocaleDateString()}

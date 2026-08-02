@@ -101,6 +101,9 @@ const sendEmailJsApi = async (
         accessToken: privateKey,
         template_params: {
           to_email: to,
+          user_email: to,
+          reply_to: to,
+          email: to,
           recipient_name: templateParams?.recipientName ?? to,
           badge_text: templateParams?.badgeText ?? "COMPLIANCE NOTICE",
           notification_title: subject,

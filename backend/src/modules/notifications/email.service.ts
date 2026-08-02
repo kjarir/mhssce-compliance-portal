@@ -6,27 +6,68 @@ import { logger } from "../../core/utils/logger";
 let transporter: Transporter | null = null;
 
 /**
- * Lazily create the Nodemailer SMTP transporter.
- * Returns null if SMTP credentials are not configured.
+ * Send email using Brevo Transactional REST API (https://api.brevo.com/v3/smtp/email)
+ */
+const sendBrevoApiEmail = async (to: string, subject: string, htmlBody: string): Promise<boolean> => {
+  const apiKey = env.BREVO_API_KEY || process.env.BREVO_API_KEY;
+  if (!apiKey) return false;
+
+  const senderEmail = env.EMAIL_FROM_ADDRESS ?? "noreply@aicp.local";
+
+  try {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": apiKey,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        sender: { name: "AICP Portal", email: senderEmail },
+        to: [{ email: to }],
+        subject,
+        htmlContent: htmlBody
+      })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      logger.info({ messageId: (data as any)?.messageId, to, subject }, "Workflow email sent successfully via Brevo API");
+      return true;
+    } else {
+      const errText = await res.text();
+      logger.warn({ status: res.status, errText }, "Brevo API email failed, attempting SMTP fallback");
+      return false;
+    }
+  } catch (err) {
+    logger.error({ error: err instanceof Error ? err.message : "Unknown" }, "Brevo API request error");
+    return false;
+  }
+};
+
+/**
+ * Lazily create the Nodemailer SMTP transporter (Brevo SMTP or Gmail SMTP).
  */
 const getTransporter = (): Transporter | null => {
   if (transporter) {
     return transporter;
   }
 
-  if (!env.EMAIL_SMTP_HOST || !env.EMAIL_SMTP_USER || !env.EMAIL_SMTP_PASS) {
+  // Auto-detect Brevo SMTP if host is smtp-relay.brevo.com or custom
+  const host = env.EMAIL_SMTP_HOST || "smtp-relay.brevo.com";
+  const user = env.EMAIL_SMTP_USER;
+  const pass = env.EMAIL_SMTP_PASS;
+
+  if (!user || !pass) {
     logger.warn("SMTP credentials not configured — email notifications disabled");
     return null;
   }
 
   transporter = nodemailer.createTransport({
-    host: env.EMAIL_SMTP_HOST,
-    port: env.EMAIL_SMTP_PORT,
+    host,
+    port: env.EMAIL_SMTP_PORT || 587,
     secure: env.EMAIL_SMTP_PORT === 465,
-    auth: {
-      user: env.EMAIL_SMTP_USER,
-      pass: env.EMAIL_SMTP_PASS
-    }
+    auth: { user, pass }
   });
 
   return transporter;
@@ -34,17 +75,24 @@ const getTransporter = (): Transporter | null => {
 
 /**
  * Send a workflow notification email.
- * Gracefully skips if SMTP is not configured.
+ * First tries Brevo API, then falls back to Brevo SMTP / Nodemailer.
  */
 export const sendWorkflowEmail = async (
   to: string,
   subject: string,
   htmlBody: string
 ): Promise<boolean> => {
+  // 1. Try Brevo HTTPS API first if BREVO_API_KEY is configured
+  if (env.BREVO_API_KEY || process.env.BREVO_API_KEY) {
+    const sentViaBrevo = await sendBrevoApiEmail(to, subject, htmlBody);
+    if (sentViaBrevo) return true;
+  }
+
+  // 2. Fallback to Nodemailer SMTP (works with Brevo SMTP or Gmail SMTP)
   const mailer = getTransporter();
 
   if (!mailer) {
-    logger.info({ to, subject }, "Skipping email — SMTP not configured");
+    logger.info({ to, subject }, "Skipping email — Neither Brevo API nor SMTP configured");
     return false;
   }
 
@@ -60,7 +108,7 @@ export const sendWorkflowEmail = async (
 
     logger.info(
       { messageId: info.messageId, to, subject },
-      "Workflow email sent successfully"
+      "Workflow email sent successfully via SMTP"
     );
 
     return true;

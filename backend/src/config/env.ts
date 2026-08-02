@@ -26,7 +26,8 @@ const envSchema = z.object({
   EMAIL_SMTP_USER: z.string().optional(),
   EMAIL_SMTP_PASS: z.string().optional(),
   EMAIL_FROM_ADDRESS: z.string().email().optional(),
-  GEMINI_API_KEY: z.string().optional()
+  GEMINI_API_KEY: z.string().optional(),
+  BREVO_API_KEY: z.string().optional()
 }).refine(
   (data) => data.NODE_ENV !== "production" || !!data.WEBHOOK_SHARED_SECRET,
   {

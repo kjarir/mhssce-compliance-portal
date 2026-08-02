@@ -414,14 +414,20 @@ const ApprovalsPage = () => {
                       {/* Action Buttons */}
                       <div className="flex gap-2 flex-wrap pt-1">
                         {userRole === 'HOD' && (
-                          <button
-                            onClick={() => handleAction(approval.document_id, 'feedback')}
-                            disabled={submitMutation.isPending || !feedbackText.trim()}
-                            className="bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
-                          >
-                            <MessageSquare size={14} />
-                            Submit Feedback
-                          </button>
+                          approval.step === 'HOD Reviewed' ? (
+                            <div className="bg-emerald-100 text-emerald-800 font-bold text-xs px-4 py-2 rounded-xl inline-flex items-center gap-1.5">
+                              <CheckCircle size={15} /> Approved by HOD (Pending Principal Review)
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleAction(approval.document_id, 'feedback')}
+                              disabled={submitMutation.isPending || !feedbackText.trim()}
+                              className="bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
+                            >
+                              <MessageSquare size={14} />
+                              Approve / Submit HOD Feedback
+                            </button>
+                          )
                         )}
 
                         {(userRole === 'Principal' || userRole === 'Admin') && (
@@ -561,22 +567,28 @@ const ApprovalsPage = () => {
 
                       <div className="flex gap-2 flex-wrap">
                         {userRole === 'HOD' ? (
-                          <>
-                            <button
-                              onClick={() => handleRenewalAction(renewal.id, 'approve')}
-                              disabled={reviewRenewalMutation.isPending}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
-                            >
-                              <CheckCircle size={14} /> Approve to Principal
-                            </button>
-                            <button
-                              onClick={() => handleRenewalAction(renewal.id, 'reject')}
-                              disabled={reviewRenewalMutation.isPending}
-                              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
-                            >
-                              <XCircle size={14} /> Reject
-                            </button>
-                          </>
+                          renewal.status === 'Pending Principal' || renewal.hod_feedback ? (
+                            <div className="bg-emerald-100 text-emerald-800 font-bold text-xs px-4 py-2 rounded-xl inline-flex items-center gap-1.5">
+                              <CheckCircle size={15} /> Approved by HOD (Pending Principal Review)
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleRenewalAction(renewal.id, 'approve')}
+                                disabled={reviewRenewalMutation.isPending}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
+                              >
+                                <CheckCircle size={14} /> Approve to Principal
+                              </button>
+                              <button
+                                onClick={() => handleRenewalAction(renewal.id, 'reject')}
+                                disabled={reviewRenewalMutation.isPending}
+                                className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
+                              >
+                                <XCircle size={14} /> Reject
+                              </button>
+                            </>
+                          )
                         ) : (userRole === 'Principal' || userRole === 'Admin') ? (
                           <>
                             <button

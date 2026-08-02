@@ -94,7 +94,10 @@ const DocumentsPage = () => {
           institutes(name),
           document_renewals(
             id,
-            status
+            status,
+            hod_feedback,
+            principal_feedback,
+            created_at
           ),
           approvals(
             id,
@@ -244,6 +247,11 @@ const DocumentsPage = () => {
                   const pendingRenewal = doc.document_renewals?.find(
                     (r) => r.status === "Pending HOD" || r.status === "Pending Principal"
                   );
+                  
+                  const rejectedRenewal = doc.document_renewals?.find(
+                    (r) => r.status === "Rejected"
+                  );
+                  const rejectionReason = rejectedRenewal?.principal_feedback || rejectedRenewal?.hod_feedback || "Renewal rejected during review.";
 
                   return (
                     <tr
@@ -286,6 +294,22 @@ const DocumentsPage = () => {
                             <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1 uppercase">
                               Renewal Pending
                             </span>
+                          ) : rejectedRenewal ? (
+                            <div className="inline-flex items-center gap-1.5">
+                              <span 
+                                className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1 uppercase cursor-help"
+                                title={`Reason: ${rejectionReason}`}
+                              >
+                                Renewal Rejected: {rejectionReason}
+                              </span>
+                              <button
+                                onClick={(e) => handleOpenRenewModal(doc.id, doc.document_name, e)}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg shadow-sm transition-all"
+                              >
+                                <RefreshCw size={12} strokeWidth={2.5} />
+                                Re-upload
+                              </button>
+                            </div>
                           ) : (
                             <button
                               onClick={(e) => handleOpenRenewModal(doc.id, doc.document_name, e)}

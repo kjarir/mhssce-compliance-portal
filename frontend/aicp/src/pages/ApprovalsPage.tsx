@@ -118,9 +118,9 @@ const ApprovalsPage = () => {
       if (error) throw error;
       const list = (data as unknown as RenewalRow[]) ?? [];
 
-      // Filter: Only show pending renewals (status !== 'Approved') & match institute unless user is Super Admin
+      // Filter: Only show pending renewals (status !== 'Approved' && status !== 'Rejected') & match institute unless user is Super Admin
       return list.filter((r: any) => {
-        if (r.status === 'Approved') return false;
+        if (r.status === 'Approved' || r.status === 'Rejected') return false;
         if (userRole !== 'Admin' && profile?.institute_id) {
           const docObj = Array.isArray(r.documents) ? r.documents[0] : r.documents;
           return docObj?.institute_id === profile.institute_id;
@@ -520,8 +520,8 @@ const ApprovalsPage = () => {
 
                     <div className="flex items-center gap-4">
                       <StatusBadge status={
-                        renewal.status === 'Approved' ? 'valid' :
-                        renewal.status === 'Rejected' ? 'expired' : 'pending_review'
+                        renewal.status === 'Approved' ? 'approved' :
+                        renewal.status === 'Rejected' ? 'rejected' : 'pending_review'
                       } />
 
                       {(userRole === 'HOD' || userRole === 'Principal' || userRole === 'Admin') && (

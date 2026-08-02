@@ -218,10 +218,15 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
 
   switch (event) {
     case "document_uploaded": {
-      recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal"]);
+      recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal", "Admin"]);
       const uploader = await fetchUploader(documentId);
       if (uploader) {
         recipients.push(uploader);
+      }
+      // If still no recipients found for institute, fetch all Admins portal-wide
+      if (recipients.length === 0) {
+        const { data: globalAdmins } = await supabaseAdmin.from("users").select("id, full_name, role").eq("role", "Admin");
+        recipients.push(...(globalAdmins ?? []));
       }
       title = "New Document Uploaded";
       message = `${actorName} (${actorRole}) has uploaded "${documentName}" for review.`;

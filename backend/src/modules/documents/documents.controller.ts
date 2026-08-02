@@ -112,21 +112,15 @@ export const documentsController = {
 
     const { status, milestoneDays } = await documentService.confirmUpload(payload, uploaderId, instituteId);
 
-    // Fallback dispatcher: Try BullMQ queue first, fallback to synchronous/in-process execution if Redis is not running
+    // Guaranteed Notification Dispatcher: Fire and forget in-process execution so HTTP response stays fast
     const dispatchNotification = async (jobData: any) => {
       try {
-        await workflowNotificationQueue.add("workflow-notification", jobData);
-      } catch (err) {
-        logger.info("Redis queue unavailable or errored; processing notification in-process");
-        try {
-          const { processWorkflowNotification } = await import("../../jobs/workers/workflow-notification.worker");
-          // Fire and forget in-process processing so HTTP response stays fast while email sends in background
-          processWorkflowNotification(jobData).catch((e) => {
-            logger.error({ error: e instanceof Error ? e.message : "Unknown" }, "In-process notification error");
-          });
-        } catch (syncErr) {
-          logger.error("In-process notification setup failed");
-        }
+        const { processWorkflowNotification } = await import("../../jobs/workers/workflow-notification.worker");
+        processWorkflowNotification(jobData).catch((e) => {
+          logger.error({ error: e instanceof Error ? e.message : "Unknown" }, "In-process notification error");
+        });
+      } catch (syncErr) {
+        logger.error("In-process notification setup failed");
       }
     };
 

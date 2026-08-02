@@ -280,10 +280,13 @@ const ApprovalsPage = () => {
               </div>
             )}
 
-            {latestPerDoc.map((approval) => {
-              const docName = approval.documents?.document_name ?? 'Unknown Document';
-              const instName = approval.documents?.institutes?.name ?? 'Unknown Institute';
-              const reviewerName = approval.users?.full_name ?? 'System';
+            {latestPerDoc.filter(a => a.step !== 'Principal Approved').map((approval: any) => {
+              const docObj = Array.isArray(approval.documents) ? approval.documents[0] : approval.documents;
+              const instObj = docObj?.institutes;
+              const instName = Array.isArray(instObj) ? instObj[0]?.name : instObj?.name;
+              const docName = docObj?.document_name ?? 'Compliance Document';
+              const displayInst = instName ?? 'M.H. Saboo Siddik College of Engineering';
+              const reviewerName = (Array.isArray(approval.users) ? approval.users[0]?.full_name : approval.users?.full_name) ?? 'Clerk';
               const isExpanded = expandedDoc === approval.document_id;
               const docFeedback = getFeedbackForDoc(approval.document_id);
               const feedbackText = feedbackMap[approval.document_id] ?? '';
@@ -293,7 +296,7 @@ const ApprovalsPage = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-gray-900 text-sm mb-0.5 truncate">{docName}</h3>
-                      <p className="text-xs font-semibold text-emerald-800 truncate">{instName}</p>
+                      <p className="text-xs font-semibold text-emerald-800 truncate">{displayInst}</p>
                       <p className="text-[11px] text-gray-400 mt-1">
                         Last reviewed by <span className="font-bold text-gray-700">{reviewerName}</span> on{' '}
                         {new Date(approval.created_at).toLocaleDateString()}

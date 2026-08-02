@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { env } from "../../config/env";
 import { supabaseAdmin } from "../../config/supabase";
 import { AppError } from "../../core/errors/AppError";
+import { logger } from "../../core/utils/logger";
 import type { GenerateUploadUrlInput, ConfirmUploadInput } from "./documents.schemas";
 
 const sanitizeFilename = (filename: string): string => {
@@ -116,6 +117,18 @@ export const documentService = {
 
     if (insertError) {
       throw new AppError("Failed to save document metadata", 500, insertError.message);
+    }
+
+    // Insert Initial Approval tracking record into approvals table so HOD/Principal can review & approve
+    const { error: approvalErr } = await supabaseAdmin.from("approvals").insert({
+      document_id: payload.documentId,
+      reviewer_id: uploaderId,
+      step: "Pending",
+      feedback: "Document uploaded by Clerk — Pending HOD & Principal review"
+    });
+
+    if (approvalErr) {
+      logger.warn({ error: approvalErr.message }, "Failed to create initial approval record");
     }
 
     return { status, milestoneDays };

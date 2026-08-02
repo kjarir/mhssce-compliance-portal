@@ -165,14 +165,11 @@ const ApprovalsPage = () => {
   });
 
   const handleAction = (documentId: string, action: 'feedback' | 'approve' | 'reject') => {
-    const fb = feedbackMap[documentId] || '';
-    if (!fb.trim()) {
-      return; // Require feedback text
-    }
+    const fb = feedbackMap[documentId]?.trim() || (action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Reviewed');
 
     submitMutation.mutate({
       documentId,
-      feedback: fb.trim(),
+      feedback: fb,
       action,
     });
   };
@@ -425,14 +422,22 @@ const ApprovalsPage = () => {
                               <CheckCircle size={15} /> Approved by HOD (Pending Principal Review)
                             </div>
                           ) : (
-                            <button
-                              onClick={() => handleAction(approval.document_id, 'feedback')}
-                              disabled={submitMutation.isPending || !feedbackText.trim()}
-                              className="bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
-                            >
-                              <MessageSquare size={14} />
-                              Approve / Submit HOD Feedback
-                            </button>
+                            <>
+                              <button
+                                onClick={() => handleAction(approval.document_id, 'approve')}
+                                disabled={submitMutation.isPending}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
+                              >
+                                <CheckCircle size={14} /> Approve to Principal
+                              </button>
+                              <button
+                                onClick={() => handleAction(approval.document_id, 'reject')}
+                                disabled={submitMutation.isPending}
+                                className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
+                              >
+                                <XCircle size={14} /> Reject
+                              </button>
+                            </>
                           )
                         )}
 

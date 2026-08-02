@@ -15,17 +15,24 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const {
+  // Get current session or refresh if stale
+  let {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // If token is missing or near expiration, force a session refresh
   if (!session?.access_token) {
-    throw new Error("No active session. Please sign in.");
+    const { data: refreshData } = await supabase.auth.refreshSession();
+    session = refreshData.session;
+  }
+
+  if (!session?.access_token) {
+    throw new Error("No active session. Please sign in again.");
   }
 
   const url = `${API_BASE_URL}${endpoint}`;
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -33,6 +40,21 @@ export async function apiFetch<T>(
       ...options.headers,
     },
   });
+
+  // If request failed with 401 Unauthorized, token might be expired. Force token refresh & retry once!
+  if (response.status === 401) {
+    const { data: refreshData } = await supabase.auth.refreshSession();
+    if (refreshData.session?.access_token) {
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${refreshData.session.access_token}`,
+          ...options.headers,
+        },
+      });
+    }
+  }
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => null);

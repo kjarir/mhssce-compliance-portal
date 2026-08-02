@@ -111,15 +111,15 @@ const ApprovalsPage = () => {
       if (error) throw error;
       const list = (data as unknown as RenewalRow[]) ?? [];
 
-      // Filter by institute unless user is Super Admin
-      if (userRole !== 'Admin' && profile?.institute_id) {
-        return list.filter((r: any) => {
+      // Filter: Only show pending renewals (status !== 'Approved') & match institute unless user is Super Admin
+      return list.filter((r: any) => {
+        if (r.status === 'Approved') return false;
+        if (userRole !== 'Admin' && profile?.institute_id) {
           const docObj = Array.isArray(r.documents) ? r.documents[0] : r.documents;
           return docObj?.institute_id === profile.institute_id;
-        });
-      }
-
-      return list;
+        }
+        return true;
+      });
     },
   });
 

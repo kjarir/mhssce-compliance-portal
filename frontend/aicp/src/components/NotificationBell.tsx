@@ -130,33 +130,29 @@ export function NotificationBell() {
           setIsOpen(!isOpen);
           if (!isOpen) fetchNotifications();
         }}
-        className="relative p-2 border-[3px] border-foreground bg-card hover:bg-muted transition-colors"
-        style={{ boxShadow: "2px 2px 0px hsl(150 10% 10%)" }}
+        className="relative p-2.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all shadow-sm focus:outline-none"
         aria-label="Notifications"
       >
-        <Bell size={20} />
+        <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-[hsl(0,72%,51%)] text-white text-[10px] font-bold min-w-[20px] h-[20px] flex items-center justify-center border-[2px] border-foreground">
+          <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-extrabold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Dropdown */}
+      {/* Dropdown Popover */}
       {isOpen && (
-        <div
-          className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card border-[3px] border-foreground z-50 max-h-[400px] flex flex-col"
-          style={{ boxShadow: "6px 6px 0px hsl(150 10% 10%)" }}
-        >
+        <div className="absolute right-0 top-full mt-3 w-80 sm:w-96 bg-white border border-gray-200/90 rounded-2xl shadow-xl z-50 max-h-[420px] flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b-[3px] border-foreground bg-primary">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-primary-foreground">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-[#064E3B] text-white">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider">
               Notifications
             </h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-[10px] font-bold uppercase tracking-wider text-primary-foreground/80 hover:text-primary-foreground"
+                className="text-[10px] font-bold text-emerald-200 hover:text-white transition-colors uppercase tracking-wider"
               >
                 Mark all read
               </button>
@@ -164,18 +160,18 @@ export function NotificationBell() {
           </div>
 
           {/* Notifications List */}
-          <div className="overflow-y-auto flex-1">
+          <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
             {loading && notifications.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-sm font-bold text-muted-foreground animate-pulse uppercase">
-                  Loading...
+                <p className="text-xs font-semibold text-gray-400 animate-pulse">
+                  Fetching updates...
                 </p>
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-6 text-center">
+              <div className="p-8 text-center">
                 <p className="text-2xl mb-2">🔔</p>
-                <p className="text-sm font-bold text-muted-foreground uppercase">
-                  No notifications yet
+                <p className="text-xs font-bold text-gray-500 uppercase">
+                  No notifications
                 </p>
               </div>
             ) : (
@@ -187,27 +183,27 @@ export function NotificationBell() {
                       markAsRead(notification.id);
                     }
                   }}
-                  className={`w-full text-left px-4 py-3 border-b-2 border-muted transition-colors hover:bg-muted/50 ${
-                    !notification.is_read ? "bg-[hsl(152,60%,96%)]" : ""
+                  className={`w-full text-left px-5 py-3.5 transition-colors hover:bg-gray-50/80 ${
+                    !notification.is_read ? "bg-emerald-50/40" : ""
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-lg shrink-0 mt-0.5">
+                    <span className="text-base shrink-0 mt-0.5">
                       {getTypeIcon(notification.type)}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-xs uppercase tracking-wider truncate">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <p className="font-bold text-xs text-gray-900 truncate">
                           {notification.title}
                         </p>
                         {!notification.is_read && (
-                          <span className="w-2 h-2 bg-primary rounded-full shrink-0" />
+                          <span className="w-2 h-2 bg-[#064E3B] rounded-full shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
                         {notification.message}
                       </p>
-                      <p className="text-[10px] text-muted-foreground/60 mt-1 font-medium">
+                      <p className="text-[10px] font-semibold text-gray-400 mt-1.5">
                         {timeAgo(notification.created_at)}
                       </p>
                     </div>

@@ -12,6 +12,8 @@ import { documentsRoutes } from "./modules/documents/documents.routes";
 import { institutesRoutes } from "./modules/institutes/institutes.routes";
 import { approvalsRoutes } from "./modules/approvals/approvals.routes";
 import { webhooksRoutes } from "./modules/webhooks/webhooks.routes";
+import { copilotRoutes } from "./modules/copilot/copilot.routes";
+import { ocrRoutes } from "./modules/ocr/ocr.routes";
 
 export const app = express();
 
@@ -57,6 +59,8 @@ app.use("/api/documents", documentsRoutes);
 app.use("/api/institutes", institutesRoutes);
 app.use("/api/approvals", approvalsRoutes);
 app.use("/api/webhooks", webhooksRoutes);
+app.use("/api/copilot", copilotRoutes);
+app.use("/api/ocr", ocrRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -108,24 +108,20 @@ export const documentsController = {
 
     const { status, milestoneDays } = await documentService.confirmUpload(payload, uploaderId, instituteId);
 
-    // Fallback dispatcher: Try BullMQ first. If Redis is down, run synchronously.
+    // Fallback dispatcher: Try BullMQ queue first, fallback to synchronous/in-process execution if Redis is not running
     const dispatchNotification = async (jobData: any) => {
       try {
-        const { env } = await import("../../config/env");
-        if (env.REDIS_URL && env.REDIS_URL.includes("127.0.0.1")) {
-           // Developer environment missing Redis? Fallback synchronously.
-           const { processWorkflowNotification } = await import("../../jobs/workers/workflow-notification.worker");
-           await processWorkflowNotification(jobData);
-           return;
-        }
         await workflowNotificationQueue.add("workflow-notification", jobData);
       } catch (err) {
-        logger.warn({ error: err instanceof Error ? err.message : "Unknown" }, "Failed to queue event, falling back to synchronous execution");
+        logger.info("Redis queue unavailable or errored; processing notification in-process");
         try {
-           const { processWorkflowNotification } = await import("../../jobs/workers/workflow-notification.worker");
-           await processWorkflowNotification(jobData);
+          const { processWorkflowNotification } = await import("../../jobs/workers/workflow-notification.worker");
+          // Fire and forget in-process processing so HTTP response stays fast while email sends in background
+          processWorkflowNotification(jobData).catch((e) => {
+            logger.error({ error: e instanceof Error ? e.message : "Unknown" }, "In-process notification error");
+          });
         } catch (syncErr) {
-           logger.error("Synchronous notification processing also failed");
+          logger.error("In-process notification setup failed");
         }
       }
     };

@@ -124,40 +124,37 @@ export function RenewModal({ isOpen, onClose, onSuccess, documentId, documentNam
   const isSubmitting = ["generating-url", "uploading", "saving"].includes(uploadStep);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div 
-        className="bg-card w-full max-w-lg border-[3px] border-foreground flex flex-col max-h-[90vh]"
-        style={{ boxShadow: "8px 8px 0px hsl(150 10% 10%)" }}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+      <div className="bg-white w-full max-w-lg rounded-2xl border border-gray-200 shadow-xl flex flex-col max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b-[3px] border-foreground p-4 bg-[hsl(45,90%,85%)]">
-          <h2 className="font-mono font-bold text-xl uppercase text-[hsl(45,90%,30%)] flex-1 truncate mr-4">
+        <div className="flex items-center justify-between border-b border-gray-100 p-5 bg-emerald-50/50">
+          <h2 className="font-bold text-sm text-emerald-950 flex-1 truncate mr-4">
             Renew {documentName}
           </h2>
           <button 
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-1 hover:bg-black/10 rounded disabled:opacity-50"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all disabled:opacity-50"
           >
-            <X size={24} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto">
+        <div className="p-6 overflow-y-auto space-y-5">
           {uploadStep === "error" && (
-            <div className="bg-[hsl(0,70%,92%)] border-[3px] border-foreground p-4 flex items-start gap-3 mb-6">
-              <AlertCircle className="text-[hsl(0,70%,40%)] shrink-0 mt-0.5" size={20} />
+            <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
+              <AlertCircle className="text-rose-600 shrink-0 mt-0.5" size={18} />
               <div>
-                <p className="font-bold text-sm text-[hsl(0,70%,30%)]">Upload Failed</p>
-                <p className="text-sm text-[hsl(0,70%,40%)] mt-1">{errorMessage}</p>
+                <p className="font-bold text-xs text-rose-800">Upload Failed</p>
+                <p className="text-xs text-rose-600 mt-0.5">{errorMessage}</p>
               </div>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-bold uppercase tracking-wider block mb-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
                 New Expiry Date
               </label>
               <input
@@ -166,27 +163,27 @@ export function RenewModal({ isOpen, onClose, onSuccess, documentId, documentNam
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
                 disabled={isSubmitting}
-                className="brutal-input w-full"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50"
               />
             </div>
 
             <div>
-              <label className="text-sm font-bold uppercase tracking-wider block mb-2">
-                Upload New File
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
+                Attachment / Renewal Document File
               </label>
-              <div className="border-[3px] border-dashed border-foreground p-6 text-center bg-muted">
-                <Upload className="mx-auto text-muted-foreground mb-3" size={32} />
+              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                <Upload className="mx-auto text-gray-400 mb-2" size={32} />
                 {selectedFile ? (
-                  <p className="font-bold text-sm">
+                  <p className="font-bold text-xs text-gray-800">
                     {selectedFile.name}{" "}
-                    <span className="text-muted-foreground font-normal">
+                    <span className="text-gray-400 font-normal">
                       ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                     </span>
                   </p>
                 ) : (
                   <>
-                    <p className="font-bold text-sm">Select renewal file</p>
-                    <p className="text-xs text-muted-foreground mt-1">PDF, JPEG, PNG — Max 10MB</p>
+                    <p className="font-bold text-xs text-gray-800">Select renewal file</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Supports PDF, JPEG, PNG formats (Max 10MB)</p>
                   </>
                 )}
                 <input
@@ -201,7 +198,7 @@ export function RenewModal({ isOpen, onClose, onSuccess, documentId, documentNam
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isSubmitting}
-                  className="brutal-button mt-4 !py-1 !px-4 !text-xs w-auto mx-auto block"
+                  className="mt-3 text-xs font-bold text-[#064E3B] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-1.5 rounded-xl transition-all"
                 >
                   {selectedFile ? "Change File" : "Browse Files"}
                 </button>
@@ -211,15 +208,15 @@ export function RenewModal({ isOpen, onClose, onSuccess, documentId, documentNam
             <button
               type="submit"
               disabled={isSubmitting}
-              className="brutal-button w-full text-base flex justify-center items-center gap-2 disabled:opacity-75"
+              className="bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs w-full py-3 rounded-xl shadow-sm transition-all disabled:opacity-50 flex justify-center items-center gap-2 mt-2"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="animate-spin" size={18} />
-                  Processing...
+                  <Loader2 className="animate-spin text-white" size={16} />
+                  Processing Renewal...
                 </>
               ) : (
-                "Submit Renewal →"
+                "Submit Renewal for Review →"
               )}
             </button>
           </form>

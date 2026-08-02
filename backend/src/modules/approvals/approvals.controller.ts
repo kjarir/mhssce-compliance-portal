@@ -42,7 +42,24 @@ export const approvalsController = {
           }
         );
       } catch (err) {
-        logger.warn({ error: err instanceof Error ? err.message : "Unknown" }, "Failed to queue workflow notification (Redis may be down)");
+        logger.info("Redis queue unavailable; processing approval notification in-process");
+        try {
+          const { processWorkflowNotification } = await import("../../jobs/workers/workflow-notification.worker");
+          processWorkflowNotification({
+            event,
+            documentId: docInfo.id,
+            documentName: docInfo.document_name,
+            instituteId: docInfo.institute_id,
+            actorName: reviewerName,
+            actorRole: reviewerRole,
+            feedback: payload.feedback,
+            decision: payload.action === "approve" ? "approved" : payload.action === "reject" ? "rejected" : undefined
+          }).catch((e) => {
+            logger.error({ error: e instanceof Error ? e.message : "Unknown" }, "In-process approval notification error");
+          });
+        } catch (syncErr) {
+          logger.error("Failed to process approval notification in-process");
+        }
       }
     }
 

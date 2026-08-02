@@ -190,65 +190,64 @@ const ApprovalsPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-mono font-bold uppercase">Approvals Workflow</h1>
-          <p className="text-muted-foreground font-medium mt-1">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Approvals & Workflow</h1>
+          <p className="text-xs text-gray-500 font-medium mt-1">
             {userRole === 'Admin'
-              ? 'Overview of all document approvals across institutes'
-              : 'Track and manage document approval pipeline'}
+              ? 'Overview of all document approvals and review pipelines across institutes'
+              : 'Track, review, and process compliance document approvals'}
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 border-b-2 border-foreground/20 mb-8">
-          <button
-            onClick={() => setActiveTab('initial')}
-            className={`pb-2 px-1 border-b-[3px] font-bold text-sm uppercase tracking-wider transition-colors ${
-              activeTab === 'initial'
-                ? 'border-foreground text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground/80'
-            }`}
-          >
-            Initial Approvals
-          </button>
-          <button
-            onClick={() => setActiveTab('renewals')}
-            className={`flex items-center gap-2 pb-2 px-1 border-b-[3px] font-bold text-sm uppercase tracking-wider transition-colors ${
-              activeTab === 'renewals'
-                ? 'border-[hsl(45,90%,50%)] text-[hsl(45,90%,30%)]'
-                : 'border-transparent text-muted-foreground hover:text-foreground/80'
-            }`}
-          >
-            <FileClock size={16} />
-            Renewals
-          </button>
-        </div>
+        {/* Tabs & Workflow Pipeline */}
+        <div className="bg-white border border-gray-200/80 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
+          <div className="flex flex-wrap gap-2 sm:gap-3 border-b border-gray-100 pb-3">
+            <button
+              onClick={() => setActiveTab('initial')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'initial'
+                  ? 'bg-[#064E3B] text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Initial Approvals
+            </button>
+            <button
+              onClick={() => setActiveTab('renewals')}
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'renewals'
+                  ? 'bg-[#064E3B] text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <FileClock size={15} />
+              Renewals Pipeline
+            </button>
+          </div>
 
-        {/* Workflow Visual */}
-        <div className="mb-8 overflow-x-auto">
-          <div
-            className="bg-card border-[3px] border-foreground p-6 inline-flex items-center gap-2 min-w-max"
-            style={{ boxShadow: '4px 4px 0px hsl(150 10% 10%)' }}
-          >
-            {(activeTab === 'initial' ? WORKFLOW_STEPS : RENEWAL_STEPS).map((step, idx) => (
-              <div key={step} className="flex items-center gap-2">
-                <div className="bg-primary text-primary-foreground px-4 py-2 border-[2px] border-foreground text-xs font-bold uppercase tracking-wider">
-                  {step}
+          {/* Workflow Pipeline Progress */}
+          <div className="overflow-x-auto pb-1">
+            <div className="inline-flex items-center gap-2 sm:gap-3 min-w-max">
+              {(activeTab === 'initial' ? WORKFLOW_STEPS : RENEWAL_STEPS).map((step, idx) => (
+                <div key={step} className="flex items-center gap-2 sm:gap-3">
+                  <div className="bg-emerald-50 text-[#064E3B] border border-emerald-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap">
+                    {step}
+                  </div>
+                  {idx < (activeTab === 'initial' ? WORKFLOW_STEPS.length : RENEWAL_STEPS.length) - 1 && (
+                    <ArrowRight className="text-gray-300 shrink-0" size={14} />
+                  )}
                 </div>
-                {idx < (activeTab === 'initial' ? WORKFLOW_STEPS.length : RENEWAL_STEPS.length) - 1 && <ArrowRight className="text-foreground" size={20} />}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Loading */}
         {(isLoading || isRenewalsLoading) && (
-          <div className="flex items-center justify-center py-16">
-            <div className="flex items-center gap-3">
-              <Loader2 className="animate-spin" size={24} />
-              <p className="text-lg font-mono font-bold uppercase">Loading workflow data...</p>
-            </div>
+          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+            <Loader2 className="animate-spin text-[#064E3B] mb-2" size={28} />
+            <p className="text-xs font-semibold">Loading approval queue...</p>
           </div>
         )}
 
@@ -256,8 +255,8 @@ const ApprovalsPage = () => {
         {!isLoading && activeTab === 'initial' && (
           <div className="space-y-4">
             {latestPerDoc.length === 0 && (
-              <div className="text-center py-16 text-muted-foreground font-bold uppercase">
-                No initial approvals found.
+              <div className="bg-white border border-gray-200/80 rounded-2xl text-center py-16 text-xs text-gray-400 font-semibold uppercase">
+                No pending initial approvals found.
               </div>
             )}
 
@@ -270,76 +269,71 @@ const ApprovalsPage = () => {
               const feedbackText = feedbackMap[approval.document_id] ?? '';
 
               return (
-                <BrutalCard key={approval.id} flat>
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg">{docName}</h3>
-                      <p className="text-sm text-muted-foreground">{instName}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Last reviewed by <span className="font-bold">{reviewerName}</span> on{' '}
+                <div key={approval.id} className="bg-white border border-gray-200/80 rounded-2xl p-4 sm:p-6 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-sm mb-0.5 truncate">{docName}</h3>
+                      <p className="text-xs font-semibold text-emerald-800 truncate">{instName}</p>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        Last reviewed by <span className="font-bold text-gray-700">{reviewerName}</span> on{' '}
                         {new Date(approval.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex flex-col items-start md:items-end gap-2">
-                      <StatusBadge status={stepToStatus(approval.step) as 'valid' | 'expiring' | 'expired'} />
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Step: {approval.step}
-                      </span>
-                    </div>
 
-                    {/* Action buttons based on role */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap items-center gap-3 shrink-0">
+                      <StatusBadge status={stepToStatus(approval.step) as 'valid' | 'expiring' | 'expired'} />
+
                       {(userRole === 'HOD' || userRole === 'Principal' || userRole === 'Admin') && (
-                        <>
+                        <div className="flex gap-2">
                           {approval.documents?.file_path && (
                             <button
-                              className="brutal-button !py-2 !px-4 !text-xs !bg-secondary !text-secondary-foreground"
+                              className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl transition-all"
                               onClick={() => handleViewDocument(approval.documents!.file_path)}
                             >
-                              <ExternalLink size={14} className="mr-1 inline" />
-                              View Doc
+                              <ExternalLink size={14} />
+                              View
                             </button>
                           )}
                           {approval.step !== 'Principal Approved' && approval.step !== 'Rejected' && (
                             <button
-                              className="brutal-button !py-2 !px-4 !text-xs"
+                              className="inline-flex items-center gap-1 text-xs font-bold bg-[#064E3B] hover:bg-[#04382B] text-white px-3.5 py-2 rounded-xl transition-all shadow-sm"
                               onClick={() =>
                                 setExpandedDoc(isExpanded ? null : approval.document_id)
                               }
                             >
-                              <MessageSquare size={14} className="mr-1 inline" />
+                              <MessageSquare size={14} />
                               {isExpanded ? 'Close' : 'Review'}
                             </button>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
 
                   {/* Expanded Review Panel */}
                   {isExpanded && (
-                    <div className="mt-4 border-t-[3px] border-foreground/20 pt-4 space-y-4">
+                    <div className="mt-5 border-t border-gray-100 pt-5 space-y-4">
                       {/* Previous Feedback */}
                       {docFeedback.length > 0 && (
                         <div>
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                            Previous Feedback
+                          <h4 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                            Audit Trail & Feedback
                           </h4>
                           <div className="space-y-2">
                             {docFeedback.map((fb) => (
                               <div
                                 key={fb.id}
-                                className="bg-muted border-[2px] border-foreground/20 p-3"
+                                className="bg-gray-50 border border-gray-200/60 rounded-xl p-3"
                               >
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-bold">
-                                    {fb.users?.full_name ?? 'Unknown'}
+                                  <span className="text-xs font-bold text-gray-900">
+                                    {fb.users?.full_name ?? 'Reviewer'}
                                   </span>
-                                  <span className="text-[10px] text-muted-foreground">
+                                  <span className="text-[10px] text-gray-400 font-semibold">
                                     {new Date(fb.created_at).toLocaleDateString()} · {fb.step}
                                   </span>
                                 </div>
-                                <p className="text-sm">{fb.feedback}</p>
+                                <p className="text-xs text-gray-600 leading-relaxed">{fb.feedback}</p>
                               </div>
                             ))}
                           </div>
@@ -348,8 +342,8 @@ const ApprovalsPage = () => {
 
                       {/* Feedback Input */}
                       <div>
-                        <label className="text-xs font-bold uppercase tracking-wider block mb-2">
-                          Your Feedback
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
+                          Reviewer Comments
                         </label>
                         <textarea
                           value={feedbackText}
@@ -359,65 +353,49 @@ const ApprovalsPage = () => {
                               [approval.document_id]: e.target.value,
                             }))
                           }
-                          placeholder="Enter your review comments..."
+                          placeholder="Provide review notes or decision details..."
                           rows={3}
-                          className="brutal-input"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50"
                         />
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex gap-2 flex-wrap">
-                        {/* HOD: Only feedback */}
+                      <div className="flex gap-2 flex-wrap pt-1">
                         {userRole === 'HOD' && (
                           <button
                             onClick={() => handleAction(approval.document_id, 'feedback')}
                             disabled={submitMutation.isPending || !feedbackText.trim()}
-                            className="brutal-button !py-2 !px-4 !text-xs disabled:opacity-50"
+                            className="bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
                           >
-                            <MessageSquare size={14} className="mr-1 inline" />
+                            <MessageSquare size={14} />
                             Submit Feedback
                           </button>
                         )}
 
-                        {/* Principal / Admin: Approve, Reject, or Feedback */}
                         {(userRole === 'Principal' || userRole === 'Admin') && (
                           <>
                             <button
                               onClick={() => handleAction(approval.document_id, 'approve')}
                               disabled={submitMutation.isPending || !feedbackText.trim()}
-                              className="brutal-button !py-2 !px-4 !text-xs disabled:opacity-50"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
                             >
-                              <CheckCircle size={14} className="mr-1 inline" />
+                              <CheckCircle size={14} />
                               Approve
                             </button>
                             <button
                               onClick={() => handleAction(approval.document_id, 'reject')}
                               disabled={submitMutation.isPending || !feedbackText.trim()}
-                              className="brutal-button !py-2 !px-4 !text-xs !bg-destructive disabled:opacity-50"
+                              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
                             >
-                              <XCircle size={14} className="mr-1 inline" />
+                              <XCircle size={14} />
                               Reject
-                            </button>
-                            <button
-                              onClick={() => handleAction(approval.document_id, 'feedback')}
-                              disabled={submitMutation.isPending || !feedbackText.trim()}
-                              className="brutal-button !py-2 !px-4 !text-xs !bg-secondary !text-secondary-foreground disabled:opacity-50"
-                            >
-                              <MessageSquare size={14} className="mr-1 inline" />
-                              Feedback Only
                             </button>
                           </>
                         )}
                       </div>
-
-                      {submitMutation.isError && (
-                        <p className="text-sm font-bold text-[hsl(0,70%,40%)]">
-                          {submitMutation.error?.message ?? 'Failed to submit'}
-                        </p>
-                      )}
                     </div>
                   )}
-                </BrutalCard>
+                </div>
               );
             })}
           </div>
@@ -427,8 +405,8 @@ const ApprovalsPage = () => {
         {!isRenewalsLoading && activeTab === 'renewals' && (
           <div className="space-y-4">
             {renewals.length === 0 && (
-              <div className="text-center py-16 text-muted-foreground font-bold uppercase">
-                No renewals pending.
+              <div className="bg-white border border-gray-200/80 rounded-2xl text-center py-16 text-xs text-gray-400 font-semibold uppercase">
+                No active document renewals pending.
               </div>
             )}
 
@@ -440,85 +418,51 @@ const ApprovalsPage = () => {
               const feedbackText = feedbackMap[renewal.id] ?? '';
 
               return (
-                <BrutalCard key={renewal.id} flat>
+                <div key={renewal.id} className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg">{docName} <span className="text-[hsl(45,90%,30%)] italic text-sm">(Renewal)</span></h3>
-                      <p className="text-sm text-muted-foreground">{instName}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Renewal uploaded by <span className="font-bold">{uploaderName}</span> on{' '}
+                      <h3 className="font-bold text-gray-900 text-sm mb-0.5">{docName} <span className="text-amber-700 italic text-xs">(Renewal)</span></h3>
+                      <p className="text-xs font-semibold text-emerald-800">{instName}</p>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        Uploaded by <span className="font-bold text-gray-700">{uploaderName}</span> on{' '}
                         {new Date(renewal.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex flex-col items-start md:items-end gap-2">
-                       <StatusBadge status={
-                         renewal.status === 'Approved' ? 'valid' :
-                         renewal.status === 'Rejected' ? 'expired' : 'pending_review'
-                       } />
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Step: {renewal.status}
-                      </span>
-                    </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-4">
+                      <StatusBadge status={
+                        renewal.status === 'Approved' ? 'valid' :
+                        renewal.status === 'Rejected' ? 'expired' : 'pending_review'
+                      } />
+
                       {(userRole === 'HOD' || userRole === 'Principal' || userRole === 'Admin') && (
-                        <>
+                        <div className="flex gap-2">
                           <button
-                            className="brutal-button !py-2 !px-4 !text-xs !bg-secondary !text-secondary-foreground"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl transition-all"
                             onClick={() => handleViewDocument(renewal.file_path)}
                           >
-                            <ExternalLink size={14} className="mr-1 inline" />
-                            View Renewal Doc
+                            <ExternalLink size={14} />
+                            View File
                           </button>
                           {renewal.status !== 'Approved' && renewal.status !== 'Rejected' && (
                             <button
-                              className="brutal-button !py-2 !px-4 !text-xs"
-                              onClick={() =>
-                                setExpandedDoc(isExpanded ? null : renewal.id)
-                              }
+                              className="inline-flex items-center gap-1 text-xs font-bold bg-[#064E3B] hover:bg-[#04382B] text-white px-4 py-2 rounded-xl transition-all shadow-sm"
+                              onClick={() => setExpandedDoc(isExpanded ? null : renewal.id)}
                             >
-                              <MessageSquare size={14} className="mr-1 inline" />
+                              <MessageSquare size={14} />
                               {isExpanded ? 'Close' : 'Review'}
                             </button>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Expanded Review Panel */}
                   {isExpanded && (
-                    <div className="mt-4 border-t-[3px] border-foreground/20 pt-4 space-y-4">
-                      
-                      {/* Previous Feedbacks for Renewal */}
-                      {(renewal.hod_feedback || renewal.principal_feedback) && (
-                        <div>
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Previous Feedback</h4>
-                          <div className="space-y-2">
-                            {renewal.hod_feedback && (
-                              <div className="bg-muted border-[2px] border-foreground/20 p-3">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-bold">HOD Feedback</span>
-                                </div>
-                                <p className="text-sm">{renewal.hod_feedback}</p>
-                              </div>
-                            )}
-                            {renewal.principal_feedback && (
-                              <div className="bg-muted border-[2px] border-foreground/20 p-3">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-bold">Principal Feedback</span>
-                                </div>
-                                <p className="text-sm">{renewal.principal_feedback}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Action Panel */}
+                    <div className="mt-5 border-t border-gray-100 pt-5 space-y-4">
                       <div>
-                        <label className="text-xs font-bold uppercase tracking-wider block mb-2">
-                          Your Findings / Review
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
+                          Review Findings
                         </label>
                         <textarea
                           value={feedbackText}
@@ -528,9 +472,9 @@ const ApprovalsPage = () => {
                               [renewal.id]: e.target.value,
                             }))
                           }
-                          placeholder="Optional feedback..."
+                          placeholder="Optional review notes..."
                           rows={3}
-                          className="brutal-input"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50"
                         />
                       </div>
 
@@ -540,16 +484,16 @@ const ApprovalsPage = () => {
                             <button
                               onClick={() => handleRenewalAction(renewal.id, 'approve')}
                               disabled={reviewRenewalMutation.isPending}
-                              className="brutal-button !py-2 !px-4 !text-xs disabled:opacity-50"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
                             >
-                              <CheckCircle size={14} className="mr-1 inline" /> Approve to Principal
+                              <CheckCircle size={14} /> Approve to Principal
                             </button>
                             <button
                               onClick={() => handleRenewalAction(renewal.id, 'reject')}
                               disabled={reviewRenewalMutation.isPending}
-                              className="brutal-button !py-2 !px-4 !text-xs !bg-destructive disabled:opacity-50"
+                              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
                             >
-                              <XCircle size={14} className="mr-1 inline" /> Reject
+                              <XCircle size={14} /> Reject
                             </button>
                           </>
                         ) : (userRole === 'Principal' || userRole === 'Admin') ? (
@@ -557,30 +501,24 @@ const ApprovalsPage = () => {
                             <button
                               onClick={() => handleRenewalAction(renewal.id, 'approve')}
                               disabled={reviewRenewalMutation.isPending}
-                              className="brutal-button !py-2 !px-4 !text-xs disabled:opacity-50"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
                             >
-                              <CheckCircle size={14} className="mr-1 inline" /> Final Approve
+                              <CheckCircle size={14} /> Final Approve
                             </button>
                             <button
                               onClick={() => handleRenewalAction(renewal.id, 'reject')}
                               disabled={reviewRenewalMutation.isPending}
-                              className="brutal-button !py-2 !px-4 !text-xs !bg-destructive disabled:opacity-50"
+                              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm inline-flex items-center gap-1.5"
                             >
-                              <XCircle size={14} className="mr-1 inline" /> Reject
+                              <XCircle size={14} /> Reject
                             </button>
                           </>
                         ) : null}
                       </div>
-
-                      {reviewRenewalMutation.isError && (
-                        <p className="text-sm font-bold text-[hsl(0,70%,40%)]">
-                          {reviewRenewalMutation.error?.message ?? 'Failed to submit context'}
-                        </p>
-                      )}
                     </div>
                   )}
-                </BrutalCard>
-               );
+                </div>
+              );
             })}
           </div>
         )}

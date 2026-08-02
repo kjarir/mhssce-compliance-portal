@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,56 +6,35 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 150 10% 10%;
+    --background: 210 20% 98%;
+    --foreground: 160 20% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 150 10% 10%;
+    --card-foreground: 160 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 150 10% 10%;
+    --popover-foreground: 160 20% 12%;
 
-    --primary: 152 60% 36%;
+    --primary: 162 70% 18%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 30% 90%;
-    --secondary-foreground: 150 10% 10%;
+    --secondary: 160 15% 94%;
+    --secondary-foreground: 162 70% 18%;
 
-    --muted: 150 15% 93%;
-    --muted-foreground: 150 10% 40%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 12% 48%;
 
-    --accent: 152 50% 45%;
+    --accent: 160 60% 28%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 10% 10%;
-    --input: 150 10% 10%;
-    --ring: 152 60% 36%;
+    --border: 210 15% 88%;
+    --input: 210 15% 88%;
+    --ring: 162 70% 18%;
 
-    --radius: 0px;
-
-    /* Neurobrutalism tokens */
-    --brutal-shadow: 4px 4px 0px hsl(150 10% 10%);
-    --brutal-shadow-lg: 6px 6px 0px hsl(150 10% 10%);
-    --brutal-shadow-sm: 2px 2px 0px hsl(150 10% 10%);
-    --brutal-border: 3px solid hsl(150 10% 10%);
-    --brutal-border-thin: 2px solid hsl(150 10% 10%);
-
-    /* Status colors */
-    --status-valid: 142 70% 45%;
-    --status-expiring: 45 93% 47%;
-    --status-expired: 0 72% 51%;
-
-    --sidebar-background: 152 60% 36%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 152 60% 36%;
-    --sidebar-accent: 152 50% 30%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 152 50% 30%;
-    --sidebar-ring: 0 0% 100%;
+    --radius: 1rem;
   }
 }
 
@@ -65,70 +44,50 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Space Grotesk', sans-serif;
+    @apply bg-[#F4F6F5] text-foreground font-sans antialiased selection:bg-primary/20;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
-    @apply font-bold tracking-tight;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    @apply font-bold tracking-tight text-foreground;
   }
 }
 
 @layer components {
-  .brutal-card {
-    @apply bg-card border-[3px] border-foreground p-5;
-    box-shadow: var(--brutal-shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  .formal-card {
+    @apply bg-card border border-border/70 rounded-2xl p-6 shadow-sm transition-all duration-200 hover:shadow-md;
   }
 
-  .brutal-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: var(--brutal-shadow-lg);
+  .formal-card-flat {
+    @apply bg-card border border-border/70 rounded-2xl p-6 shadow-sm;
   }
 
-  .brutal-card-flat {
-    @apply bg-card border-[3px] border-foreground p-5;
-    box-shadow: var(--brutal-shadow);
+  .formal-button {
+    @apply inline-flex items-center justify-center font-semibold text-sm px-5 py-2.5 rounded-full bg-[#064E3B] text-white shadow-sm hover:bg-[#04382B] active:scale-[0.98] transition-all duration-150;
+  }
+
+  .brutal-card, .brutal-card-flat {
+    @apply bg-card border border-border/80 rounded-2xl p-6 shadow-sm;
   }
 
   .brutal-button {
-    @apply inline-flex items-center justify-center font-bold uppercase tracking-wider text-sm px-6 py-3 border-[3px] border-foreground bg-primary text-primary-foreground;
-    box-shadow: var(--brutal-shadow-sm);
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-  }
-
-  .brutal-button:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: var(--brutal-shadow);
-  }
-
-  .brutal-button:active {
-    transform: translate(2px, 2px);
-    box-shadow: none;
+    @apply inline-flex items-center justify-center font-semibold text-sm px-5 py-2.5 rounded-full bg-[#064E3B] text-white shadow-sm hover:bg-[#04382B] active:scale-[0.98] transition-all duration-150;
   }
 
   .brutal-input {
-    @apply w-full px-4 py-3 border-[3px] border-foreground bg-card text-foreground font-medium;
-    box-shadow: var(--brutal-shadow-sm);
-  }
-
-  .brutal-input:focus {
-    @apply outline-none ring-2 ring-primary;
+    @apply w-full px-4 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-transparent transition-all;
   }
 
   .status-valid {
-    @apply bg-[hsl(142,70%,45%)] text-white border-[2px] border-foreground font-bold px-3 py-1 text-xs uppercase tracking-wider;
-    box-shadow: var(--brutal-shadow-sm);
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider;
   }
 
   .status-expiring {
-    @apply bg-[hsl(45,93%,47%)] text-foreground border-[2px] border-foreground font-bold px-3 py-1 text-xs uppercase tracking-wider;
-    box-shadow: var(--brutal-shadow-sm);
+    @apply bg-amber-50 text-amber-800 border border-amber-200 font-bold px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider;
   }
 
   .status-expired {
-    @apply bg-[hsl(0,72%,51%)] text-white border-[2px] border-foreground font-bold px-3 py-1 text-xs uppercase tracking-wider;
-    box-shadow: var(--brutal-shadow-sm);
+    @apply bg-rose-50 text-rose-700 border border-rose-200 font-bold px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider;
   }
 }

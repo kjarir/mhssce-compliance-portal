@@ -4,9 +4,11 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { CATEGORIES } from "@/data/types";
-import { Search, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { Search, RefreshCw, Trash2, Eye, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { RenewModal } from "@/components/RenewModal";
+import { DocumentDetailModal } from "@/components/DocumentDetailModal";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -59,11 +61,20 @@ const DocumentsPage = () => {
   const [renewModalOpen, setRenewModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<{ id: string; name: string } | null>(null);
 
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedDetailDoc, setSelectedDetailDoc] = useState<any | null>(null);
+
   const queryClient = useQueryClient();
 
-  const handleOpenRenewModal = (id: string, name: string) => {
+  const handleOpenRenewModal = (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedDoc({ id, name });
     setRenewModalOpen(true);
+  };
+
+  const handleOpenDetailModal = (doc: any) => {
+    setSelectedDetailDoc(doc);
+    setDetailModalOpen(true);
   };
 
   const {
@@ -123,33 +134,33 @@ const DocumentsPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-mono font-bold uppercase">Documents</h1>
-          <p className="text-muted-foreground font-medium mt-1">
-            All compliance documents across institutes
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Compliance Documents</h1>
+          <p className="text-xs text-gray-500 font-medium mt-1">
+            Manage, filter, and track all institutional compliance certificates and documentation
           </p>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="relative">
+        <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              size={18}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              size={16}
             />
             <input
               type="text"
-              placeholder="Search documents..."
+              placeholder="Search documents or institutes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="brutal-input pl-10"
+              className="w-full pl-9 pr-4 h-10 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50"
             />
           </div>
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="brutal-input"
+            className="w-full md:w-56 h-10 px-3.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50 text-gray-700 cursor-pointer"
           >
             <option value="all">All Categories</option>
             {CATEGORIES.map((c) => (
@@ -161,72 +172,47 @@ const DocumentsPage = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="brutal-input"
+            className="w-full md:w-44 h-10 px-3.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50 text-gray-700 cursor-pointer"
           >
             <option value="all">All Status</option>
             <option value="valid">Valid</option>
-            <option value="expiring">Expiring</option>
+            <option value="expiring">Expiring Soon</option>
             <option value="expired">Expired</option>
           </select>
         </div>
 
         {/* Loading state */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-16">
-            <div className="flex items-center gap-3">
-              <Loader2 className="animate-spin" size={24} />
-              <p className="text-lg font-mono font-bold uppercase">
-                Loading documents...
-              </p>
-            </div>
-          </div>
-        )}
+        {isLoading && <TableSkeleton rows={6} />}
 
         {/* Error state */}
         {error && (
-          <div className="bg-[hsl(0,70%,92%)] border-[3px] border-foreground p-4 mb-6">
-            <p className="font-bold text-sm text-[hsl(0,70%,30%)]">
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4">
+            <p className="font-bold text-xs text-rose-700">
               Failed to load documents: {(error as Error).message}
             </p>
           </div>
         )}
 
-        {/* Table */}
+        {/* Table Container */}
         {!isLoading && (
-          <div
-            className="border-[3px] border-foreground overflow-x-auto"
-            style={{ boxShadow: "4px 4px 0px hsl(150 10% 10%)" }}
-          >
-            <table className="w-full">
+          <div className="bg-white border border-gray-200/80 rounded-2xl overflow-x-auto shadow-sm">
+            <table className="w-full text-left border-collapse min-w-[640px]">
               <thead>
-                <tr className="bg-primary text-primary-foreground">
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Document
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30 hidden md:table-cell">
-                    Institute
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30 hidden lg:table-cell">
-                    Category
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Expiry
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Status
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider">
-                    Actions
-                  </th>
+                <tr className="bg-gray-50/80 border-b border-gray-200/80 text-gray-500 text-[11px] font-extrabold uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-4">Document Details</th>
+                  <th className="px-4 sm:px-6 py-4 hidden md:table-cell">Institute</th>
+                  <th className="px-4 sm:px-6 py-4 hidden lg:table-cell">Category</th>
+                  <th className="px-4 sm:px-6 py-4">Expiry Date</th>
+                  <th className="px-4 sm:px-6 py-4">Status</th>
+                  <th className="px-4 sm:px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {filtered.map((doc, idx) => {
+              <tbody className="divide-y divide-gray-100 text-xs font-medium text-gray-700">
+                {filtered.map((doc) => {
                   const status = normalizeStatus(doc.status);
                   const daysToExpiry = getDaysUntilExpiry(doc.expiry_date);
                   const isRenewable = daysToExpiry <= 90;
                   
-                  // Check if a renewal is already pending (not Approved/Rejected)
                   const pendingRenewal = doc.document_renewals?.find(
                     (r) => r.status === "Pending HOD" || r.status === "Pending Principal"
                   );
@@ -234,56 +220,69 @@ const DocumentsPage = () => {
                   return (
                     <tr
                       key={doc.id}
-                      className={`${
-                        idx % 2 === 0 ? "bg-card" : "bg-muted/50"
-                      } border-t-2 border-foreground/20`}
+                      tabIndex={0}
+                      role="button"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleOpenDetailModal(doc);
+                        }
+                      }}
+                      onClick={() => handleOpenDetailModal(doc)}
+                      className="hover:bg-emerald-50/40 cursor-pointer transition-colors group"
                     >
-                      <td className="px-4 py-3 border-r-2 border-foreground/10">
-                        <p className="font-bold text-sm">{doc.document_name}</p>
-                        <p className="text-xs text-muted-foreground">
+                      <td className="px-4 sm:px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-[#064E3B] transition-colors">{doc.document_name}</p>
+                          <Eye size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        </div>
+                        <p className="text-[11px] text-gray-400 font-semibold uppercase">
                           {doc.responsible_person}
                         </p>
                       </td>
-                      <td className="px-4 py-3 text-sm hidden md:table-cell border-r-2 border-foreground/10">
+                      <td className="px-4 sm:px-6 py-4 hidden md:table-cell font-semibold text-gray-800">
                         {doc.institutes?.name ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-sm hidden lg:table-cell border-r-2 border-foreground/10">
+                      <td className="px-4 sm:px-6 py-4 hidden lg:table-cell text-gray-600">
                         {doc.category}
                       </td>
-                      <td className="px-4 py-3 text-sm font-mono border-r-2 border-foreground/10">
+                      <td className="px-4 sm:px-6 py-4 font-semibold text-gray-700 whitespace-nowrap">
                         {doc.expiry_date}
                       </td>
-                      <td className="px-4 py-3 font-mono border-r-2 border-foreground/10">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <StatusBadge status={status} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 sm:px-6 py-4 text-right space-x-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         {isClerk && isRenewable && (
                           pendingRenewal ? (
-                            <span className="text-xs font-bold text-muted-foreground uppercase py-1 px-2 border-2 border-muted-foreground/30 rounded bg-muted">
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1 uppercase">
                               Renewal Pending
                             </span>
                           ) : (
                             <button
-                              onClick={() => handleOpenRenewModal(doc.id, doc.document_name)}
-                              className="brutal-btn-sm bg-[hsl(45,90%,50%)] hover:bg-[hsl(45,90%,40%)] text-foreground flex items-center gap-1"
+                              onClick={(e) => handleOpenRenewModal(doc.id, doc.document_name, e)}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition-all"
                             >
-                              <RefreshCw size={14} strokeWidth={2.5} />
+                              <RefreshCw size={12} strokeWidth={2.5} />
                               Renew
                             </button>
                           )
                         )}
                         {!isClerk && isRenewable && pendingRenewal && (
-                          <span className="text-xs font-bold text-[hsl(45,90%,30%)] uppercase py-1 px-2 border-2 border-[hsl(45,90%,30%)] rounded bg-[hsl(45,90%,85%)]">
-                            Renewal Submitted
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 rounded-lg px-2.5 py-1 uppercase">
+                            Submitted
                           </span>
                         )}
                         <button
-                          onClick={() => handleDelete(doc.id, doc.document_name)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(doc.id, doc.document_name);
+                          }}
                           disabled={deleteMutation.isPending}
-                          className="brutal-btn-sm ml-2 bg-destructive text-destructive-foreground hover:bg-[hsl(0,70%,40%)] flex items-center gap-1 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1.5 rounded-lg transition-all"
                           title="Delete Document"
                         >
-                          <Trash2 size={14} strokeWidth={2.5} />
+                          <Trash2 size={13} />
                         </button>
                       </td>
                     </tr>
@@ -292,8 +291,21 @@ const DocumentsPage = () => {
               </tbody>
             </table>
             {filtered.length === 0 && !isLoading && (
-              <div className="text-center py-12 text-muted-foreground font-bold">
-                No documents found.
+              <div className="text-center py-12 text-gray-400 font-semibold text-xs space-y-3">
+                <p>No documents found matching your filter criteria.</p>
+                {(search || categoryFilter !== "all" || statusFilter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setCategoryFilter("all");
+                      setStatusFilter("all");
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#064E3B] bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-xl border border-emerald-200 transition-all"
+                  >
+                    <RotateCcw size={13} />
+                    Reset All Filters
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -310,6 +322,14 @@ const DocumentsPage = () => {
           }}
           documentId={selectedDoc.id}
           documentName={selectedDoc.name}
+        />
+      )}
+
+      {selectedDetailDoc && (
+        <DocumentDetailModal
+          isOpen={detailModalOpen}
+          onClose={() => setDetailModalOpen(false)}
+          document={selectedDetailDoc}
         />
       )}
     </AppLayout>

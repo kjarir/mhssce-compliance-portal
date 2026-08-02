@@ -13,6 +13,7 @@ import DocumentsPage from "./pages/DocumentsPage";
 import UploadPage from "./pages/UploadPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import ReportsPage from "./pages/ReportsPage";
+import CopilotPage from "./pages/CopilotPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -73,6 +74,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/copilot"
+              element={
+                <ProtectedRoute allowedRoles={["Admin", "Principal"]}>
+                  <CopilotPage />
                 </ProtectedRoute>
               }
             />

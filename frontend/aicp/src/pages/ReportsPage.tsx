@@ -91,125 +91,129 @@ const ReportsPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-mono font-bold uppercase">Compliance Reports</h1>
-          <p className="text-muted-foreground font-medium mt-1">
-            Summary of compliance status across all institutes
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Compliance Analytics & Reports</h1>
+          <p className="text-xs text-gray-500 font-medium mt-1">
+            Comprehensive audit readiness, category distribution, and institute health scorecards
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-[hsl(0,70%,92%)] border-[3px] border-foreground p-4 mb-6">
-            <p className="font-bold text-sm text-[hsl(0,70%,30%)]">
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4">
+            <p className="font-bold text-xs text-rose-700">
               Failed to load reports: {(error as Error).message}
             </p>
           </div>
         )}
 
         {/* Overall Summary */}
-        <BrutalCard flat className="mb-8">
-          <h2 className="text-xl font-mono font-bold uppercase mb-4">Overall Compliance Summary</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-muted p-4 border-[2px] border-foreground text-center">
-              <p className="text-3xl font-mono font-bold">{total}</p>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total</p>
+        <div className="bg-white border border-gray-200/80 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5 sm:space-y-6">
+          <h2 className="text-xs sm:text-sm font-bold text-gray-900 uppercase tracking-wider">Overall Compliance Summary</h2>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-gray-50 border border-gray-200/80 rounded-xl p-3 sm:p-4 text-center">
+              <p className="text-xl sm:text-2xl font-extrabold text-gray-900">{total}</p>
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Total Records</p>
             </div>
-            <div className="bg-[hsl(142,70%,92%)] p-4 border-[2px] border-foreground text-center">
-              <p className="text-3xl font-mono font-bold text-status-valid">{valid}</p>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Valid</p>
+            <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-3 sm:p-4 text-center">
+              <p className="text-xl sm:text-2xl font-extrabold text-emerald-700">{valid}</p>
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-800 mt-0.5">Valid</p>
             </div>
-            <div className="bg-[hsl(45,93%,90%)] p-4 border-[2px] border-foreground text-center">
-              <p className="text-3xl font-mono font-bold text-status-expiring">{expiring}</p>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Expiring</p>
+            <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3 sm:p-4 text-center">
+              <p className="text-xl sm:text-2xl font-extrabold text-amber-700">{expiring}</p>
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-800 mt-0.5">Expiring Soon</p>
             </div>
-            <div className="bg-[hsl(0,72%,93%)] p-4 border-[2px] border-foreground text-center">
-              <p className="text-3xl font-mono font-bold text-status-expired">{expired}</p>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Expired</p>
+            <div className="bg-rose-50/60 border border-rose-200/80 rounded-xl p-3 sm:p-4 text-center">
+              <p className="text-xl sm:text-2xl font-extrabold text-rose-700">{expired}</p>
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-rose-800 mt-0.5">Expired</p>
             </div>
           </div>
 
-          {/* Visual bar */}
+          {/* Visual Bar */}
           {total > 0 && (
-            <>
-              <div className="mt-4 flex h-8 border-[2px] border-foreground overflow-hidden">
-                <div className="bg-status-valid h-full" style={{ width: `${(valid / total) * 100}%` }} />
-                <div className="bg-status-expiring h-full" style={{ width: `${(expiring / total) * 100}%` }} />
-                <div className="bg-status-expired h-full" style={{ width: `${(expired / total) * 100}%` }} />
+            <div className="space-y-2">
+              <div className="flex h-3 rounded-full overflow-hidden bg-gray-100">
+                <div className="bg-emerald-500 h-full transition-all duration-300" style={{ width: `${(valid / total) * 100}%` }} />
+                <div className="bg-amber-400 h-full transition-all duration-300" style={{ width: `${(expiring / total) * 100}%` }} />
+                <div className="bg-rose-500 h-full transition-all duration-300" style={{ width: `${(expired / total) * 100}%` }} />
               </div>
-              <div className="flex gap-4 mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <span>🟢 {Math.round((valid / total) * 100)}% Valid</span>
-                <span>🟡 {Math.round((expiring / total) * 100)}% Expiring</span>
-                <span>🔴 {Math.round((expired / total) * 100)}% Expired</span>
+              <div className="flex flex-wrap justify-between items-center text-[11px] sm:text-xs font-semibold text-gray-600 gap-2 pt-1">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> {Math.round((valid / total) * 100)}% Valid</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" /> {Math.round((expiring / total) * 100)}% Expiring</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-500" /> {Math.round((expired / total) * 100)}% Expired</span>
               </div>
-            </>
+            </div>
           )}
-        </BrutalCard>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Institute Health */}
-          <BrutalCard flat>
-            <h2 className="text-xl font-mono font-bold uppercase mb-4">Institute Health</h2>
-            <div className="space-y-3">
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Institute Health Scorecard</h2>
+            <div className="divide-y divide-gray-100">
               {instituteHealth.length === 0 && (
-                <p className="text-muted-foreground font-medium text-sm">No institute data available.</p>
+                <p className="text-gray-400 font-semibold text-xs py-4 text-center">No institute data available.</p>
               )}
               {instituteHealth.map((inst) => (
-                <div key={inst.code} className="flex items-center justify-between border-b-2 border-muted pb-2">
+                <div key={inst.code} className="py-3.5 flex items-center justify-between gap-4">
                   <div>
-                    <p className="font-bold text-sm">{inst.code}</p>
-                    <p className="text-xs text-muted-foreground">{inst.name}</p>
+                    <p className="font-bold text-gray-900 text-sm">{inst.code}</p>
+                    <p className="text-xs text-gray-400">{inst.name}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-32 h-4 bg-muted border-[2px] border-foreground overflow-hidden">
+                  <div className="flex items-center gap-3 w-44">
+                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className={`h-full ${inst.complianceScore >= 80
-                            ? 'bg-status-valid'
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          inst.complianceScore >= 80
+                            ? 'bg-emerald-500'
                             : inst.complianceScore >= 60
-                              ? 'bg-status-expiring'
-                              : 'bg-status-expired'
-                          }`}
+                            ? 'bg-amber-500'
+                            : 'bg-rose-500'
+                        }`}
                         style={{ width: `${inst.complianceScore}%` }}
                       />
                     </div>
-                    <span className="font-mono font-bold text-sm w-10 text-right">
+                    <span className="font-bold text-xs text-gray-700 w-9 text-right">
                       {inst.complianceScore}%
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-          </BrutalCard>
+          </div>
 
           {/* Category Breakdown */}
-          <BrutalCard flat>
-            <h2 className="text-xl font-mono font-bold uppercase mb-4">By Category</h2>
-            <div className="space-y-3">
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Category Breakdown</h2>
+            <div className="divide-y divide-gray-100">
               {categoryStats.length === 0 && (
-                <p className="text-muted-foreground font-medium text-sm">No category data available.</p>
+                <p className="text-gray-400 font-semibold text-xs py-4 text-center">No category data available.</p>
               )}
               {categoryStats.map((cat) => (
-                <div key={cat.category} className="border-b-2 border-muted pb-2">
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold text-sm">{cat.category}</p>
-                    <span className="font-mono text-sm">{cat.total} docs</span>
+                <div key={cat.category} className="py-3.5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm">{cat.category}</p>
+                    <div className="flex gap-1.5 mt-1">
+                      {cat.valid > 0 && (
+                        <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">{cat.valid} valid</span>
+                      )}
+                      {cat.expiring > 0 && (
+                        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">{cat.expiring} expiring</span>
+                      )}
+                      {cat.expired > 0 && (
+                        <span className="text-[10px] font-bold text-rose-800 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">{cat.expired} expired</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-2 mt-1">
-                    {cat.valid > 0 && (
-                      <span className="status-valid !text-[10px]">{cat.valid} valid</span>
-                    )}
-                    {cat.expiring > 0 && (
-                      <span className="status-expiring !text-[10px]">{cat.expiring} expiring</span>
-                    )}
-                    {cat.expired > 0 && (
-                      <span className="status-expired !text-[10px]">{cat.expired} expired</span>
-                    )}
-                  </div>
+                  <span className="font-bold text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200/60">
+                    {cat.total} docs
+                  </span>
                 </div>
               ))}
             </div>
-          </BrutalCard>
+          </div>
         </div>
       </div>
     </AppLayout>

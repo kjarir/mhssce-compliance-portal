@@ -66,88 +66,86 @@ const InstitutesPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-mono font-bold uppercase">Institutes</h1>
-            <p className="text-muted-foreground font-medium mt-1">
-              Manage compliance across {stats.length} institutes
+            <h1 className="text-2xl font-bold text-gray-900">Institutes Overview</h1>
+            <p className="text-xs text-gray-500 font-medium mt-1">
+              Manage compliance tracking and document health across {stats.length} registered institutes
             </p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="brutal-button !py-2 !px-4 flex items-center gap-2"
+            className="inline-flex items-center justify-center gap-2 bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all shrink-0"
           >
             <Plus size={16} />
-            Add Institute
+            {showForm ? 'Close Form' : 'Add Institute'}
           </button>
         </div>
 
-        {/* Add Institute Form */}
+        {/* Add Form */}
         {showForm && (
-          <BrutalCard flat className="mb-6">
-            <h2 className="text-lg font-mono font-bold uppercase mb-4">New Institute</h2>
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Register New Institute</h2>
 
             {formError && (
-              <div className="bg-[hsl(0,70%,92%)] border-[3px] border-foreground p-3 mb-4">
-                <p className="text-sm font-bold text-[hsl(0,70%,30%)]">{formError}</p>
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 mb-4">
+                <p className="text-xs font-bold text-rose-700">{formError}</p>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-bold uppercase tracking-wider block mb-2">
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-1.5">
                   Institute Name
                 </label>
                 <input
                   type="text"
+                  required
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  required
-                  placeholder="e.g. M.H. Saboo Siddik College"
-                  className="brutal-input"
+                  placeholder="e.g. M.H. Saboo Siddik"
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50"
                 />
               </div>
               <div>
-                <label className="text-sm font-bold uppercase tracking-wider block mb-2">
-                  Code
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-1.5">
+                  Institute Code
                 </label>
                 <input
                   type="text"
+                  required
                   value={newCode}
                   onChange={(e) => setNewCode(e.target.value)}
-                  required
                   placeholder="e.g. MHSSCE"
-                  className="brutal-input"
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B] bg-gray-50/50"
                 />
               </div>
-              <div className="flex items-end">
+              <div className="flex items-end sm:col-span-2 md:col-span-1">
                 <button
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="brutal-button w-full disabled:opacity-50"
+                  className="bg-[#064E3B] hover:bg-[#04382B] text-white font-bold text-xs w-full py-2.5 rounded-xl shadow-sm transition-all disabled:opacity-50"
                 >
-                  {createMutation.isPending ? 'Creating...' : 'Create →'}
+                  {createMutation.isPending ? 'Creating...' : 'Register Institute →'}
                 </button>
               </div>
             </form>
-          </BrutalCard>
+          </div>
         )}
 
         {/* Loading */}
         {isLoading && (
-          <div className="flex items-center justify-center py-16">
-            <div className="flex items-center gap-3">
-              <Loader2 className="animate-spin" size={24} />
-              <p className="text-lg font-mono font-bold uppercase">Loading institutes...</p>
-            </div>
+          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+            <Loader2 className="animate-spin text-[#064E3B] mb-2" size={28} />
+            <p className="text-xs font-semibold">Loading institutes data...</p>
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="bg-[hsl(0,70%,92%)] border-[3px] border-foreground p-4 mb-6">
-            <p className="font-bold text-sm text-[hsl(0,70%,30%)]">
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4">
+            <p className="font-bold text-xs text-rose-700">
               Failed to load institutes: {(error as Error).message}
             </p>
           </div>
@@ -155,78 +153,55 @@ const InstitutesPage = () => {
 
         {/* Data Table */}
         {!isLoading && stats.length > 0 && (
-          <div
-            className="border-[3px] border-foreground overflow-x-auto"
-            style={{ boxShadow: '4px 4px 0px hsl(150 10% 10%)' }}
-          >
-            <table className="w-full">
+          <div className="bg-white border border-gray-200/80 rounded-2xl overflow-x-auto shadow-sm">
+            <table className="w-full text-left border-collapse min-w-[500px]">
               <thead>
-                <tr className="bg-primary text-primary-foreground">
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Institute
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Code
-                  </th>
-                  <th className="text-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Total Docs
-                  </th>
-                  <th className="text-center px-4 py-3 text-xs font-bold uppercase tracking-wider border-r-2 border-foreground/30">
-                    Valid Docs
-                  </th>
-                  <th className="text-center px-4 py-3 text-xs font-bold uppercase tracking-wider">
-                    Compliance
-                  </th>
+                <tr className="bg-gray-50/80 border-b border-gray-200/80 text-gray-500 text-[11px] font-extrabold uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-4">Institute</th>
+                  <th className="px-4 sm:px-6 py-4">Code</th>
+                  <th className="px-4 sm:px-6 py-4 text-center hidden sm:table-cell">Total Docs</th>
+                  <th className="px-4 sm:px-6 py-4 text-center hidden sm:table-cell">Valid Docs</th>
+                  <th className="px-4 sm:px-6 py-4 text-center">Compliance</th>
                 </tr>
               </thead>
-              <tbody>
-                {stats.map((inst, idx) => (
-                  <tr
-                    key={inst.id}
-                    className={`${
-                      idx % 2 === 0 ? 'bg-card' : 'bg-muted/50'
-                    } border-t-2 border-foreground/20`}
-                  >
-                    <td className="px-4 py-3 border-r-2 border-foreground/10">
+              <tbody className="divide-y divide-gray-100 text-xs font-medium text-gray-700">
+                {stats.map((inst) => (
+                  <tr key={inst.id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-4 sm:px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="bg-primary text-primary-foreground p-2 border-[2px] border-foreground">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#064E3B] flex items-center justify-center font-bold shrink-0">
                           <Building2 size={16} />
                         </div>
-                        <span className="font-bold text-sm">{inst.name}</span>
+                        <div>
+                          <p className="font-bold text-gray-900 text-sm">{inst.name}</p>
+                          <p className="text-[10px] text-gray-400 font-semibold sm:hidden">{inst.validDocuments}/{inst.totalDocuments} Valid Docs</p>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm font-mono font-bold border-r-2 border-foreground/10">
+                    <td className="px-4 sm:px-6 py-4 font-semibold text-gray-600 uppercase tracking-wider">
                       {inst.code}
                     </td>
-                    <td className="px-4 py-3 text-center font-mono font-bold text-lg border-r-2 border-foreground/10">
+                    <td className="px-4 sm:px-6 py-4 text-center font-bold text-gray-900 text-sm hidden sm:table-cell">
                       {inst.totalDocuments}
                     </td>
-                    <td className="px-4 py-3 text-center font-mono font-bold text-lg border-r-2 border-foreground/10">
+                    <td className="px-4 sm:px-6 py-4 text-center font-bold text-emerald-700 text-sm hidden sm:table-cell">
                       {inst.validDocuments}
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-20 h-3 bg-muted border-[2px] border-foreground overflow-hidden">
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-xs mx-auto">
+                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className={`h-full ${
+                            className={`h-full rounded-full transition-all duration-300 ${
                               inst.complianceScore >= 80
-                                ? 'bg-status-valid'
+                                ? 'bg-emerald-500'
                                 : inst.complianceScore >= 60
-                                ? 'bg-status-expiring'
-                                : 'bg-status-expired'
+                                ? 'bg-amber-500'
+                                : 'bg-rose-500'
                             }`}
                             style={{ width: `${inst.complianceScore}%` }}
                           />
                         </div>
-                        <span
-                          className={`font-mono font-bold text-sm ${
-                            inst.complianceScore >= 80
-                              ? 'text-status-valid'
-                              : inst.complianceScore >= 60
-                              ? 'text-status-expiring'
-                              : 'text-status-expired'
-                          }`}
-                        >
+                        <span className="font-bold text-xs text-gray-800 w-8 sm:w-10 text-right">
                           {inst.complianceScore}%
                         </span>
                       </div>
@@ -240,13 +215,13 @@ const InstitutesPage = () => {
 
         {/* Empty state */}
         {!isLoading && stats.length === 0 && !error && (
-          <div className="text-center py-16">
-            <Building2 className="mx-auto text-muted-foreground mb-4" size={48} />
-            <p className="font-bold text-lg text-muted-foreground uppercase">
+          <div className="bg-white border border-gray-200/80 rounded-2xl text-center py-16">
+            <Building2 className="mx-auto text-gray-300 mb-3" size={40} />
+            <p className="font-bold text-xs text-gray-500 uppercase">
               No institutes found
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Click "Add Institute" to create one.
+            <p className="text-xs text-gray-400 mt-1">
+              Click "Add Institute" to register your first college.
             </p>
           </div>
         )}

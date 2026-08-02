@@ -54,36 +54,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Profile row doesn't exist — try to auto-recover from auth metadata
-    // This handles users whose registration failed to create the profile row
     const meta = currentUser.user_metadata;
-    if (meta?.full_name && meta?.role && meta?.institute_id) {
-      console.warn("Profile row missing — auto-recovering from auth metadata");
+    const fallbackName = meta?.full_name ?? currentUser.email?.split("@")[0] ?? "Super Admin";
+    const fallbackRole = meta?.role ?? "Admin";
 
-      const profilePayload: Record<string, unknown> = {
-        id: currentUser.id,
-        full_name: meta.full_name,
-        role: meta.role,
-        institute_id: meta.institute_id,
-      };
-
-      const { data: recovered, error: insertError } = await supabase
-        .from("users")
-        .insert(profilePayload)
-        .select("id, institute_id, full_name, role")
-        .single<UserProfile>();
-
-      if (insertError) {
-        console.error("Auto-recovery failed:", insertError.message);
-        setProfile(null);
-        return;
+    // Query default institute if institute_id missing
+    let targetInstId = meta?.institute_id ?? null;
+    if (!targetInstId) {
+      const { data: insts } = await supabase.from("institutes").select("id").limit(1);
+      if (insts && insts.length > 0) {
+        targetInstId = insts[0].id;
       }
-
-      setProfile(recovered);
-      console.log("Profile auto-recovered successfully");
-    } else {
-      console.warn("No profile found and no metadata available for recovery");
-      setProfile(null);
     }
+
+    console.warn("Profile row missing — auto-creating user profile in public.users...");
+
+    const profilePayload = {
+      id: currentUser.id,
+      full_name: fallbackName,
+      role: fallbackRole,
+      institute_id: targetInstId,
+    };
+
+    const { data: recovered, error: insertError } = await supabase
+      .from("users")
+      .upsert(profilePayload)
+      .select("id, institute_id, full_name, role")
+      .single<UserProfile>();
+
+    if (insertError) {
+      console.error("Profile auto-creation failed:", insertError.message);
+      // Fallback local memory profile so user is not blocked
+      setProfile({
+        id: currentUser.id,
+        full_name: fallbackName,
+        role: fallbackRole as "Admin",
+        institute_id: targetInstId,
+      });
+      return;
+    }
+
+    setProfile(recovered);
+    console.log("Profile created and synced successfully");
   }, []);
 
   useEffect(() => {

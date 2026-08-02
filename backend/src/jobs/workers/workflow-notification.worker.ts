@@ -97,25 +97,109 @@ const insertNotification = async (
 };
 
 /**
- * Build email HTML for workflow notifications.
+ * Build email HTML for workflow notifications matching the new portal design system.
  */
 const buildEmailHtml = (title: string, message: string, documentName: string): string => {
+  const portalUrl = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+  const isWarning = title.toLowerCase().includes("expir") || title.toLowerCase().includes("action");
+
+  const badgeBg = isWarning ? "#FFFBEB" : "#ECFDF5";
+  const badgeBorder = isWarning ? "#FDE68A" : "#A7F3D0";
+  const badgeColor = isWarning ? "#B45309" : "#047857";
+  const badgeText = isWarning ? "ACTION REQUIRED" : "COMPLIANCE NOTICE";
+
   return `
-    <div style="font-family: 'Space Grotesk', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 3px solid #1a2e1a; padding: 24px;">
-      <div style="background: #2d8a4e; color: white; padding: 16px 24px; margin: -24px -24px 24px -24px; border-bottom: 3px solid #1a2e1a;">
-        <h1 style="margin: 0; font-size: 24px; letter-spacing: -0.5px;">AICP</h1>
-        <p style="margin: 4px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8;">Compliance Portal</p>
-      </div>
-      <h2 style="font-size: 18px; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">${title}</h2>
-      <p style="font-size: 14px; color: #444; line-height: 1.6;">${message}</p>
-      <div style="background: #f0f0f0; border: 2px solid #1a2e1a; padding: 12px; margin-top: 16px;">
-        <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666;">Document</p>
-        <p style="margin: 4px 0 0 0; font-weight: bold;">${documentName}</p>
-      </div>
-      <p style="font-size: 11px; color: #999; margin-top: 24px; text-align: center;">
-        This is an automated notification from the AICP Compliance Portal.
-      </p>
-    </div>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f4f6f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f6f5; padding: 40px 16px;">
+          <tr>
+            <td align="center">
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 560px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
+                
+                <!-- Header Banner -->
+                <tr>
+                  <td style="background-color: #064E3B; padding: 28px 32px; text-align: left;">
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>
+                          <div style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1;">
+                            Anjuman's
+                          </div>
+                          <div style="font-size: 10px; font-weight: 700; color: #6ee7b7; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">
+                            Compliance Portal
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Content Body -->
+                <tr>
+                  <td style="padding: 32px;">
+                    <!-- Badge -->
+                    <div style="display: inline-block; background-color: ${badgeBg}; border: 1px solid ${badgeBorder}; color: ${badgeColor}; font-size: 11px; font-weight: 700; padding: 4px 12px; rounded-radius: 9999px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;">
+                      ${badgeText}
+                    </div>
+
+                    <!-- Title -->
+                    <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 800; color: #111827; letter-spacing: -0.3px; line-height: 1.3;">
+                      ${title}
+                    </h1>
+
+                    <!-- Message Body -->
+                    <p style="margin: 0 0 24px 0; font-size: 14px; font-weight: 500; color: #4b5563; line-height: 1.6;">
+                      ${message}
+                    </p>
+
+                    <!-- Document Information Card -->
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                      <tr>
+                        <td>
+                          <div style="font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            Document Title
+                          </div>
+                          <div style="font-size: 15px; font-weight: 700; color: #111827;">
+                            ${documentName}
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Call To Action Button -->
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td align="left">
+                          <a href="${portalUrl}" target="_blank" style="display: inline-block; background-color: #064E3B; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 10px; box-shadow: 0 2px 4px rgba(6, 78, 59, 0.2);">
+                            Open Compliance Portal →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="background-color: #f9fafb; border-top: 1px solid #f3f4f6; padding: 20px 32px; text-align: center;">
+                    <p style="margin: 0; font-size: 12px; font-weight: 500; color: #9ca3af;">
+                      This is an automated notification from Anjuman's AICP Compliance Portal.
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
   `;
 };
 
@@ -135,6 +219,10 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
   switch (event) {
     case "document_uploaded": {
       recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal"]);
+      const uploader = await fetchUploader(documentId);
+      if (uploader) {
+        recipients.push(uploader);
+      }
       title = "New Document Uploaded";
       message = `${actorName} (${actorRole}) has uploaded "${documentName}" for review.`;
       notificationType = "upload";
@@ -143,6 +231,10 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
 
     case "renewal_uploaded": {
       recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal"]);
+      const uploader = await fetchUploader(documentId);
+      if (uploader) {
+        recipients.push(uploader);
+      }
       title = "Document Renewal Submitted";
       message = `${actorName} (${actorRole}) has submitted a renewal for "${documentName}". It is awaiting your review.`;
       notificationType = "renewal";
@@ -151,9 +243,13 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
 
     case "document_expiring": {
       recipients = await fetchUsersByRole(instituteId, ["HOD", "Principal"]);
+      const uploader = await fetchUploader(documentId);
+      if (uploader) {
+        recipients.push(uploader);
+      }
       const milestoneDays = data.milestoneDays ?? 0;
       title = "Action Required: Document Expiring";
-      message = `"${documentName}" is expiring in ${milestoneDays} days (or is already expired). Please take action to renew it.`;
+      message = `"${documentName}" is expiring in ${milestoneDays} ${milestoneDays === 1 ? 'day' : 'days'} (or is already expired). Please take action to renew it.`;
       notificationType = "expiry_warning";
       break;
     }

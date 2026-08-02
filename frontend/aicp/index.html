@@ -3,20 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Anjuman's Compliance Portal - AICP</title>
+    <meta name="description" content="Centralized institutional compliance tracking and approval portal for Anjuman-I-Islam institutes." />
+    <meta name="author" content="Anjuman-I-Islam" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        var _warn = console.warn;
+        var _error = console.error;
+        var _log = console.log;
+        
+        function isExtensionNoise(args) {
+          try {
+            var msg = Array.prototype.slice.call(args).map(function(a) {
+              return typeof a === 'string' ? a : (a && a.stack ? a.stack : JSON.stringify(a));
+            }).join(' ');
+            return (
+              msg.indexOf('MaxListenersExceededWarning') !== -1 ||
+              msg.indexOf('ObjectMultiplex') !== -1 ||
+              msg.indexOf('contentscript') !== -1 ||
+              msg.indexOf('app-init-liveness') !== -1 ||
+              msg.indexOf('background-liveness') !== -1
+            );
+          } catch(e) { return false; }
+        }
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+        console.warn = function() {
+          if (isExtensionNoise(arguments)) return;
+          _warn.apply(console, arguments);
+        };
+        console.error = function() {
+          if (isExtensionNoise(arguments)) return;
+          _error.apply(console, arguments);
+        };
+      })();
+    </script>
   </head>
 
   <body>

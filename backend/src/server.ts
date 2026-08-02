@@ -1,9 +1,11 @@
 import { app } from "./app";
 import { env } from "./config/env";
 import { logger } from "./core/utils/logger";
+import { seedInitialData } from "./scripts/seed";
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`AICP API running on port ${env.PORT}`);
+const server = app.listen(env.PORT, async () => {
+  logger.info(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
+  await seedInitialData();
 });
 
 const shutdown = (signal: string) => {

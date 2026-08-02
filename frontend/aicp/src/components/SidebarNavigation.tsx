@@ -9,6 +9,8 @@ import {
   LogOut,
   Menu,
   X,
+  UserCheck,
+  Sparkles,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +20,6 @@ interface NavItem {
   label: string;
   path: string;
   icon: LucideIcon;
-  /** Roles that can see this item. If empty/undefined, visible to all. */
   roles?: string[];
 }
 
@@ -35,16 +36,13 @@ export function SidebarNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const userRole = profile?.role ?? "";
+  const userRole = profile?.role ?? "User";
 
-  // Filter nav items based on user role
   const visibleNavItems = useMemo(() => {
     return NAV_ITEMS.filter((item) => {
-      if (!item.roles || item.roles.length === 0) {
-        return true; // Visible to all roles
-      }
+      if (!item.roles || item.roles.length === 0) return true;
       return item.roles.includes(userRole);
     });
   }, [userRole]);
@@ -56,72 +54,92 @@ export function SidebarNavigation() {
 
   return (
     <>
-      {/* Mobile toggle */}
+      {/* Mobile Menu Toggle Button */}
       <button
-        className="fixed top-4 left-4 z-50 lg:hidden brutal-button !p-2"
-        onClick={() => setCollapsed(!collapsed)}
+        className="fixed top-4 left-4 z-50 lg:hidden bg-[#064E3B] text-white p-2.5 rounded-xl shadow-md"
+        onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {collapsed ? <X size={20} /> : <Menu size={20} />}
+        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Sidebar */}
+      {/* Backdrop for mobile */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Container */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-primary border-r-[3px] border-foreground flex flex-col transition-transform duration-200 ${
-          collapsed
-            ? "translate-x-0"
-            : "-translate-x-full lg:translate-x-0"
+        className={`fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-[#064E3B] text-white flex flex-col h-screen shrink-0 transition-transform duration-200 ease-in-out ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        {/* Logo */}
-        <div className="p-6 border-b-[3px] border-foreground/30">
-          <h1 className="text-2xl font-mono font-bold text-primary-foreground tracking-tighter">
-            AICP
-          </h1>
-          <p className="text-xs text-primary-foreground/80 font-medium mt-1 uppercase tracking-widest">
-            Compliance Portal
-          </p>
+        {/* Brand Header */}
+        <div className="p-5 border-b border-emerald-800/60 flex items-center gap-3.5">
+          <Link to="/dashboard" className="block shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-md border border-emerald-100 transition-transform hover:scale-105">
+              <img
+                src="/logo1.png"
+                alt="Anjuman-I-Islam Logo"
+                className="max-h-full max-w-full object-contain filter drop-shadow-xs"
+              />
+            </div>
+          </Link>
+          <div className="min-w-0">
+            <h1 className="font-extrabold text-sm tracking-tight text-white leading-tight">
+              Anjuman's
+            </h1>
+            <p className="text-[10px] font-extrabold text-emerald-200 uppercase tracking-widest mt-0.5">
+              Compliance Portal
+            </p>
+          </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 py-4">
+        {/* Navigation Items */}
+        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           {visibleNavItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={() => setCollapsed(false)}
-                className={`flex items-center gap-3 px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3.5 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-150 ${
                   isActive
-                    ? "bg-foreground/20 text-primary-foreground border-l-4 border-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-foreground/10 hover:text-primary-foreground"
+                    ? "bg-white text-[#064E3B] shadow-sm font-bold"
+                    : "text-emerald-100/90 hover:bg-emerald-800/60 hover:text-white"
                 }`}
               >
-                <item.icon size={20} />
-                {item.label}
+                <item.icon size={18} className={isActive ? "text-[#064E3B]" : "text-emerald-300"} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t-[3px] border-foreground/30">
-          <div className="text-xs text-primary-foreground/60 mb-3 font-medium">
-            Logged in as <br />
-            <span className="text-primary-foreground font-bold">
-              {profile?.full_name ?? "..."}
-            </span>
-            <br />
-            <span className="uppercase tracking-wider">
-              {profile?.role ?? ""}
-            </span>
+        {/* Footer User Profile & Logout */}
+        <div className="p-4 m-4 rounded-2xl bg-emerald-800/50 border border-emerald-700/50 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 border border-emerald-600">
+              <UserCheck size={16} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate leading-tight">
+                {profile?.full_name ?? "User"}
+              </p>
+              <p className="text-[10px] font-bold text-emerald-200/80 uppercase tracking-wider truncate">
+                {userRole}
+              </p>
+            </div>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground text-sm font-bold uppercase tracking-wider"
+            title="Logout"
+            className="p-2 text-emerald-200 hover:text-white hover:bg-rose-600/80 rounded-xl transition-colors shrink-0"
           >
             <LogOut size={16} />
-            Logout
           </button>
         </div>
       </aside>

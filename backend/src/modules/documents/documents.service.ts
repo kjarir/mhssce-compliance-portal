@@ -33,15 +33,15 @@ export const calculateStatusAndFlags = (expiryDate: string) => {
   } else if (daysUntilExpiry < 30) {
     status = "Near Expiration";
     flags.notified_1m = true; flags.notified_2m = true; flags.notified_3m = true;
-    milestoneDays = 30;
+    milestoneDays = daysUntilExpiry;
   } else if (daysUntilExpiry < 60) {
     status = "Expiring Soon";
     flags.notified_2m = true; flags.notified_3m = true;
-    milestoneDays = 60;
+    milestoneDays = daysUntilExpiry;
   } else if (daysUntilExpiry <= 90) {
     status = "Valid";
     flags.notified_3m = true;
-    milestoneDays = 90;
+    milestoneDays = daysUntilExpiry;
   }
 
   return { status, flags, daysUntilExpiry, milestoneDays };

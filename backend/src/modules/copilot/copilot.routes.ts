@@ -141,7 +141,8 @@ INSTRUCTIONS:
     // Case A: Follow-up question about a specific document (e.g. "who uploaded this document?")
     if (isFollowupDocQuery && matchedDoc) {
       dataHighlights = [matchedDoc];
-      responseText = `For the document **"${matchedDoc.document_name}"** (${matchedDoc.institutes?.name ?? "MHSSCE"}):\n\n` +
+      const instName = Array.isArray(matchedDoc.institutes) ? matchedDoc.institutes[0]?.name : (matchedDoc.institutes as any)?.name;
+      responseText = `For the document **"${matchedDoc.document_name}"** (${instName ?? "MHSSCE"}):\n\n` +
         `• **Responsible Person / Uploader:** *${matchedDoc.responsible_person ?? "Assigned Uploader / Clerk"}*\n` +
         `• **Category:** \`${matchedDoc.category ?? "Compliance"}\` | **Status:** **${matchedDoc.status}**\n` +
         `• **Expiration Date:** **${matchedDoc.expiry_date}**`;

@@ -64,8 +64,10 @@ export const documentsController = {
       return res.status(401).json({ success: false, error: "Unauthorized" });
     }
 
+    const documentId = Array.isArray(id) ? id[0] : id;
+
     const result = await documentService.reviewRenewal(
-      id,
+      documentId,
       action as "approve" | "reject",
       feedback,
       reviewerId,
@@ -81,11 +83,13 @@ export const documentsController = {
 
   deleteDocument: async (req: Request, res: Response) => {
     const { id } = req.params;
+    const documentId = Array.isArray(id) ? id[0] : id;
     
     // Only Admin bypasses the institute check. Others only delete within their own institute context.
-    const instituteId = req.auth?.profile.role === "Admin" ? undefined : req.auth?.profile.institute_id;
+    const rawInstId = req.auth?.profile.role === "Admin" ? undefined : req.auth?.profile.institute_id;
+    const instituteId = rawInstId ?? undefined;
     
-    await documentService.deleteDocument(id, instituteId);
+    await documentService.deleteDocument(documentId, instituteId);
 
     res.status(200).json({
       success: true,

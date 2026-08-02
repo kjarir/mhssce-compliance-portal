@@ -3,32 +3,44 @@ import { BrutalCard } from '@/components/BrutalCard';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { CATEGORIES } from '@/data/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText, Download } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DocumentRow {
   id: string;
   institute_id: string;
   document_name: string;
   category: string;
+  responsible_person?: string;
+  expiry_date?: string;
   status: 'Valid' | 'Expiring Soon' | 'Expired';
   institutes: { name: string; code: string } | null;
 }
 
 const ReportsPage = () => {
+  const { profile } = useAuth();
+
   const {
     data: documents = [],
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['documents-reports'],
+    queryKey: ['documents-reports', profile?.id, profile?.institute_id],
+    enabled: !!profile,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('documents')
-        .select('id, institute_id, document_name, category, status, institutes(name, code)')
+        .select('id, institute_id, document_name, category, responsible_person, expiry_date, status, institutes(name, code)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data as unknown as DocumentRow[]) ?? [];
+      const list = (data as unknown as DocumentRow[]) ?? [];
+
+      if (profile?.role !== 'Admin' && profile?.institute_id) {
+        return list.filter((d) => d.institute_id === profile.institute_id);
+      }
+
+      return list;
     },
   });
 
@@ -92,11 +104,26 @@ const ReportsPage = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Compliance Analytics & Reports</h1>
-          <p className="text-xs text-gray-500 font-medium mt-1">
-            Comprehensive audit readiness, category distribution, and institute health scorecards
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Compliance Analytics & Reports</h1>
+            <p className="text-xs text-gray-500 font-medium mt-1">
+              Comprehensive audit readiness, category distribution, and institute health scorecards
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const instName = documents[0]?.institutes?.name ?? "M.H. Saboo Siddik College of Engineering";
+              const userName = profile?.full_name ?? "Compliance Officer";
+              import("@/lib/pdfReportGenerator").then((m) => {
+                m.generateQuarterlyPdfReport(instName, documents as any, userName);
+              });
+            }}
+            className="inline-flex items-center gap-2 bg-[#064E3B] hover:bg-[#04382B] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all shrink-0 cursor-pointer"
+          >
+            <Download size={15} />
+            Generate Quarterly Report (PDF)
+          </button>
         </div>
 
         {/* Error */}

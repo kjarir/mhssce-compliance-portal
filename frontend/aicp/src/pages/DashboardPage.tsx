@@ -124,9 +124,22 @@ const DashboardPage = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
               Dashboard Overview
             </h1>
-            <p className="text-emerald-100 text-sm leading-relaxed mb-6">
+            <p className="text-emerald-100 text-sm leading-relaxed mb-4">
               Centralized monitoring of compliance metrics across all registered institutes.
             </p>
+            <button
+              onClick={() => {
+                const instName = documents[0]?.institutes?.name ?? "M.H. Saboo Siddik College of Engineering";
+                const userName = profile?.full_name ?? "Compliance Officer";
+                import("@/lib/pdfReportGenerator").then((m) => {
+                  m.generateQuarterlyPdfReport(instName, documents, userName);
+                });
+              }}
+              className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-[#064E3B] font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all mb-4 cursor-pointer"
+            >
+              <FileText size={16} />
+              Generate Quarterly Report (PDF)
+            </button>
             <div className="flex items-center gap-8 border-t border-emerald-700/60 pt-4">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-200">

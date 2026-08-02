@@ -6,7 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Loader2, MessageSquare, CheckCircle, XCircle, FileClock, ExternalLink } from 'lucide-react';
+import { ArrowRight, Loader2, MessageSquare, CheckCircle, XCircle, FileClock, ExternalLink, Eye } from 'lucide-react';
+import { DocumentDetailModal } from '@/components/DocumentDetailModal';
 
 const WORKFLOW_STEPS = ['Clerk Upload', 'HOD Review', 'Principal Approval', 'Approved'];
 const RENEWAL_STEPS = ['Renewal Uploaded', 'HOD Review', 'Principal Approval', 'Valid'];
@@ -69,6 +70,10 @@ const ApprovalsPage = () => {
   const [activeTab, setActiveTab] = useState<'initial' | 'renewals'>('initial');
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
+
+  // Detail preview modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedDetailDoc, setSelectedDetailDoc] = useState<any | null>(null);
 
   // Fetch approvals from Supabase (RLS will auto-scope by institute)
   const {
@@ -296,8 +301,23 @@ const ApprovalsPage = () => {
               return (
                 <div key={approval.id} className="bg-white border border-gray-200/80 rounded-2xl p-4 sm:p-6 shadow-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 text-sm mb-0.5 truncate">{docName}</h3>
+                    <div 
+                      className="flex-1 min-w-0 cursor-pointer group"
+                      onClick={() => {
+                        if (docObj) {
+                          setSelectedDetailDoc({
+                            ...docObj,
+                            document_name: docName,
+                            institutes: { name: displayInst }
+                          });
+                          setDetailModalOpen(true);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900 text-sm mb-0.5 truncate group-hover:text-[#064E3B] transition-colors">{docName}</h3>
+                        <Eye size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </div>
                       <p className="text-xs font-semibold text-emerald-800 truncate">{displayInst}</p>
                       <p className="text-[11px] text-gray-400 mt-1">
                         Last reviewed by <span className="font-bold text-gray-700">{reviewerName}</span> on{' '}
@@ -310,13 +330,20 @@ const ApprovalsPage = () => {
 
                       {(userRole === 'HOD' || userRole === 'Principal' || userRole === 'Admin') && (
                         <div className="flex gap-2">
-                          {approval.documents?.file_path && (
+                          {docObj?.file_path && (
                             <button
                               className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl transition-all"
-                              onClick={() => handleViewDocument(approval.documents!.file_path)}
+                              onClick={() => {
+                                setSelectedDetailDoc({
+                                  ...docObj,
+                                  document_name: docName,
+                                  institutes: { name: displayInst }
+                                });
+                                setDetailModalOpen(true);
+                              }}
                             >
-                              <ExternalLink size={14} />
-                              View
+                              <Eye size={14} />
+                              View Details
                             </button>
                           )}
                           {approval.step !== 'Principal Approved' && approval.step !== 'Rejected' && (
@@ -448,8 +475,25 @@ const ApprovalsPage = () => {
               return (
                 <div key={renewal.id} className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm mb-0.5">{docName} <span className="text-amber-700 italic text-xs">(Renewal)</span></h3>
+                    <div 
+                      className="flex-1 cursor-pointer group"
+                      onClick={() => {
+                        if (docObj) {
+                          setSelectedDetailDoc({
+                            ...docObj,
+                            document_name: `${docName} (Renewal)`,
+                            file_path: renewal.file_path,
+                            expiry_date: renewal.expiry_date || docObj.expiry_date,
+                            institutes: { name: displayInst }
+                          });
+                          setDetailModalOpen(true);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-[#064E3B] transition-colors">{docName} <span className="text-amber-700 italic text-xs">(Renewal)</span></h3>
+                        <Eye size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </div>
                       <p className="text-xs font-semibold text-emerald-800">{displayInst}</p>
                       <p className="text-[11px] text-gray-400 mt-1">
                         Uploaded by <span className="font-bold text-gray-700">{uploaderName}</span> on{' '}
@@ -467,10 +511,19 @@ const ApprovalsPage = () => {
                         <div className="flex gap-2">
                           <button
                             className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl transition-all"
-                            onClick={() => handleViewDocument(renewal.file_path)}
+                            onClick={() => {
+                              setSelectedDetailDoc({
+                                ...docObj,
+                                document_name: `${docName} (Renewal)`,
+                                file_path: renewal.file_path,
+                                expiry_date: renewal.expiry_date || docObj.expiry_date,
+                                institutes: { name: displayInst }
+                              });
+                              setDetailModalOpen(true);
+                            }}
                           >
-                            <ExternalLink size={14} />
-                            View File
+                            <Eye size={14} />
+                            View Details
                           </button>
                           {renewal.status !== 'Approved' && renewal.status !== 'Rejected' && (
                             <button
@@ -549,6 +602,14 @@ const ApprovalsPage = () => {
               );
             })}
           </div>
+        )}
+
+        {selectedDetailDoc && (
+          <DocumentDetailModal
+            isOpen={detailModalOpen}
+            onClose={() => setDetailModalOpen(false)}
+            document={selectedDetailDoc}
+          />
         )}
       </div>
     </AppLayout>

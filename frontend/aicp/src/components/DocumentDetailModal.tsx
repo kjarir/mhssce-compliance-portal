@@ -175,7 +175,7 @@ export function DocumentDetailModal({ isOpen, onClose, document }: DocumentDetai
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Category</p>
-                    <p className="text-xs font-bold text-gray-900">{document.category}</p>
+                    <p className="text-xs font-bold text-gray-900">{document.category || "General Compliance"}</p>
                   </div>
                 </div>
 
@@ -185,7 +185,7 @@ export function DocumentDetailModal({ isOpen, onClose, document }: DocumentDetai
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Responsible Officer</p>
-                    <p className="text-xs font-bold text-gray-900">{document.responsible_person}</p>
+                    <p className="text-xs font-bold text-gray-900">{document.responsible_person || "Designated Clerk"}</p>
                   </div>
                 </div>
 
@@ -195,7 +195,11 @@ export function DocumentDetailModal({ isOpen, onClose, document }: DocumentDetai
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Expiration Date</p>
-                    <p className="text-xs font-bold text-gray-900">{document.expiry_date}</p>
+                    <p className="text-xs font-bold text-gray-900">
+                      {document.expiry_date 
+                        ? new Date(document.expiry_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+                        : "No Expiry Specified"}
+                    </p>
                   </div>
                 </div>
               </div>

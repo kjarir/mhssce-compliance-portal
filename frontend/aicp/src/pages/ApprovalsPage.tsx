@@ -85,7 +85,7 @@ const ApprovalsPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('approvals')
-        .select('*, documents(id, document_name, institute_id, uploader_id, status, file_path, institutes(name)), users:reviewer_id(full_name)')
+        .select('*, documents(id, document_name, category, responsible_person, expiry_date, institute_id, uploader_id, status, file_path, institutes(name)), users:reviewer_id(full_name)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -112,7 +112,7 @@ const ApprovalsPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('document_renewals')
-        .select('*, documents:document_id(id, document_name, institute_id, file_path, institutes(name)), users:uploader_id(full_name)')
+        .select('*, documents:document_id(id, document_name, category, responsible_person, expiry_date, institute_id, file_path, institutes(name)), users:uploader_id(full_name)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

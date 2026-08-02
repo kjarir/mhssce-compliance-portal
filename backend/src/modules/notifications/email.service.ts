@@ -84,7 +84,7 @@ const sendEmailJsApi = async (
   templateParams?: Record<string, any>
 ): Promise<boolean> => {
   const serviceId = env.EMAILJS_SERVICE_ID || process.env.EMAILJS_SERVICE_ID || "service_idnms2n";
-  const templateId = env.EMAILJS_TEMPLATE_ID || process.env.EMAILJS_TEMPLATE_ID || "template_65bc7xg";
+  const templateId = env.EMAILJS_TEMPLATE_ID || process.env.EMAILJS_TEMPLATE_ID || "template_pttzx93";
   const publicKey = env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_PUBLIC_KEY || "cqZhf1ZbQsHb4z3JF";
   const privateKey = env.EMAILJS_PRIVATE_KEY || process.env.EMAILJS_PRIVATE_KEY || "OXIZvo0A_kGgDUkOWKpCS";
 

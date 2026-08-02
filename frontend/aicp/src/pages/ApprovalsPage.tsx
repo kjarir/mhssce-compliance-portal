@@ -287,7 +287,7 @@ const ApprovalsPage = () => {
               </div>
             )}
 
-            {latestPerDoc.filter(a => a.step !== 'Principal Approved').map((approval: any) => {
+            {latestPerDoc.filter(a => a.step !== 'Principal Approved' && a.step !== 'Rejected').map((approval: any) => {
               const docObj = Array.isArray(approval.documents) ? approval.documents[0] : approval.documents;
               const instObj = docObj?.institutes;
               const instName = Array.isArray(instObj) ? instObj[0]?.name : instObj?.name;

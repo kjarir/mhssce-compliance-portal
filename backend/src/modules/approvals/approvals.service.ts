@@ -82,6 +82,16 @@ export const approvalsService = {
       throw new AppError("Failed to submit approval", 400, error?.message);
     }
 
+    // If Principal or Admin REJECTS an initial approval upload, completely purge document & storage files!
+    if (newStep === "Rejected") {
+      try {
+        const { documentService } = await import("../documents/documents.service");
+        await documentService.deleteDocument(payload.documentId, undefined);
+      } catch (delErr) {
+        // Silently log if already deleted
+      }
+    }
+
     return data;
   },
 

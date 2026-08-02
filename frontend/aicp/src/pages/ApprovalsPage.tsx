@@ -83,7 +83,17 @@ const ApprovalsPage = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data as unknown as ApprovalRow[]) ?? [];
+      const list = (data as unknown as ApprovalRow[]) ?? [];
+
+      // Filter by institute unless user is Super Admin
+      if (userRole !== 'Admin' && profile?.institute_id) {
+        return list.filter((a: any) => {
+          const docObj = Array.isArray(a.documents) ? a.documents[0] : a.documents;
+          return docObj?.institute_id === profile.institute_id;
+        });
+      }
+
+      return list;
     },
   });
 
@@ -99,7 +109,17 @@ const ApprovalsPage = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data as unknown as RenewalRow[]) ?? [];
+      const list = (data as unknown as RenewalRow[]) ?? [];
+
+      // Filter by institute unless user is Super Admin
+      if (userRole !== 'Admin' && profile?.institute_id) {
+        return list.filter((r: any) => {
+          const docObj = Array.isArray(r.documents) ? r.documents[0] : r.documents;
+          return docObj?.institute_id === profile.institute_id;
+        });
+      }
+
+      return list;
     },
   });
 

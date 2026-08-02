@@ -86,7 +86,7 @@ const DocumentsPage = () => {
     queryKey: ["documents", profile?.id, profile?.institute_id],
     enabled: !!profile,
     queryFn: async () => {
-      // Fetch documents with their active renewals
+      // Fetch documents with their active renewals and approvals
       const { data, error } = await supabase
         .from("documents")
         .select(`
@@ -95,6 +95,11 @@ const DocumentsPage = () => {
           document_renewals(
             id,
             status
+          ),
+          approvals(
+            id,
+            step,
+            created_at
           )
         `)
         .order("created_at", { ascending: false });
@@ -102,12 +107,27 @@ const DocumentsPage = () => {
       if (error) throw error;
       const list = (data as any[]) ?? [];
 
-      // Filter by institute unless user is Super Admin
-      if (profile?.role !== "Admin" && profile?.institute_id) {
-        return list.filter((doc) => doc.institute_id === profile.institute_id);
-      }
+      // Filter: 
+      // 1. Must belong to user's institute (unless Admin)
+      // 2. Must be approved (if an initial approval entry exists, latest step MUST be 'Principal Approved')
+      return list.filter((doc) => {
+        if (profile?.role !== "Admin" && profile?.institute_id && doc.institute_id !== profile.institute_id) {
+          return false;
+        }
 
-      return list;
+        const apprs = doc.approvals || [];
+        if (apprs.length > 0) {
+          // Sort approvals descending by created_at
+          const sorted = [...apprs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          const latestStep = sorted[0]?.step;
+          // If approval is pending or rejected, hide from official Documents repository
+          if (latestStep !== "Principal Approved") {
+            return false;
+          }
+        }
+
+        return true;
+      });
     },
   });
 

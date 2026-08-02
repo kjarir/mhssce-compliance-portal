@@ -72,12 +72,12 @@ export function SidebarNavigation() {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-[#064E3B] text-white flex flex-col h-screen shrink-0 transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-[#064E3B] text-white flex flex-col h-[100dvh] shrink-0 transition-transform duration-200 ease-in-out overflow-y-auto ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         {/* Brand Header */}
-        <div className="p-5 border-b border-emerald-800/60 flex items-center gap-3.5">
+        <div className="p-5 border-b border-emerald-800/60 flex items-center gap-3.5 shrink-0">
           <Link to="/dashboard" className="block shrink-0">
             <div className="w-12 h-12 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-md border border-emerald-100 transition-transform hover:scale-105">
               <img
@@ -98,7 +98,7 @@ export function SidebarNavigation() {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
           {visibleNavItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -120,7 +120,7 @@ export function SidebarNavigation() {
         </nav>
 
         {/* Footer User Profile & Logout */}
-        <div className="p-4 m-4 rounded-2xl bg-emerald-800/50 border border-emerald-700/50 flex items-center justify-between gap-3">
+        <div className="p-4 m-4 shrink-0 rounded-2xl bg-emerald-800/50 border border-emerald-700/50 flex items-center justify-between gap-3 sticky bottom-4 shadow-lg">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 border border-emerald-600">
               <UserCheck size={16} />
@@ -137,7 +137,7 @@ export function SidebarNavigation() {
           <button
             onClick={handleLogout}
             title="Logout"
-            className="p-2 text-emerald-200 hover:text-white hover:bg-rose-600/80 rounded-xl transition-colors shrink-0"
+            className="p-2 text-emerald-200 hover:text-white hover:bg-rose-600/80 bg-emerald-900/40 rounded-xl transition-colors shrink-0"
           >
             <LogOut size={16} />
           </button>

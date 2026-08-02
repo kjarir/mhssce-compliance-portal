@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { SidebarNavigation } from './SidebarNavigation';
 import { NotificationBell } from './NotificationBell';
-import { Link, useLocation } from 'react-router-dom';
 import { Bot } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { CopilotModal } from './CopilotModal';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -11,9 +11,8 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { profile } = useAuth();
-  const location = useLocation();
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const isSuperAdminOrPrincipal = profile?.role === 'Admin' || profile?.role === 'Principal';
-  const isCopilotPage = location.pathname === '/copilot';
 
   return (
     <div className="h-screen bg-[#F4F6F5] flex w-full overflow-hidden relative">
@@ -32,15 +31,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
 
       {/* Floating Robot Icon Button (Bottom Right) */}
-      {isSuperAdminOrPrincipal && !isCopilotPage && (
-        <Link
-          to="/copilot"
+      {isSuperAdminOrPrincipal && (
+        <button
+          onClick={() => setIsCopilotOpen(true)}
           title="Ask Compliance Copilot AI"
-          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-[#064E3B] hover:bg-[#04382B] text-white flex items-center justify-center shadow-2xl hover:shadow-emerald-950/40 border-2 border-emerald-400/50 transition-all transform hover:scale-110 active:scale-95"
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-[#064E3B] hover:bg-[#04382B] text-white flex items-center justify-center shadow-2xl hover:shadow-emerald-950/40 border-2 border-emerald-400/50 transition-all transform hover:scale-110 active:scale-95"
         >
-          <Bot size={30} />
-        </Link>
+          <Bot size={26} />
+        </button>
       )}
+
+      {/* Copilot Modal Popup */}
+      <CopilotModal
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+      />
     </div>
   );
 }

@@ -558,6 +558,31 @@ const ApprovalsPage = () => {
 
                   {isExpanded && (
                     <div className="mt-5 border-t border-gray-100 pt-5 space-y-4">
+                      {/* Audit Trail & HOD Feedback for Renewals */}
+                      {renewal.hod_feedback && (
+                        <div>
+                          <h4 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                            Audit Trail & HOD Feedback
+                          </h4>
+                          <div className="space-y-2">
+                            <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                                  <CheckCircle size={14} className="text-emerald-600" />
+                                  HOD Review & Recommendation
+                                </span>
+                                <span className="text-[10px] text-emerald-700 font-semibold uppercase">
+                                  Passed to Principal
+                                </span>
+                              </div>
+                              <p className="text-xs text-emerald-900 leading-relaxed font-medium">
+                                "{renewal.hod_feedback}"
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div>
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
                           Review Findings

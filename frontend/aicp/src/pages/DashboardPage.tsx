@@ -48,6 +48,9 @@ const normalizeStatus = (status: string) => {
 };
 
 const DashboardPage = () => {
+  const { profile } = useAuth();
+  const userRole = profile?.role ?? "";
+
   const { data: documents = [], isLoading: docsLoading } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
@@ -57,7 +60,13 @@ const DashboardPage = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data as DocumentRow[]) ?? [];
+      const list = (data as DocumentRow[]) ?? [];
+
+      if (userRole !== "Admin" && profile?.institute_id) {
+        return list.filter((d) => d.institute_id === profile.institute_id);
+      }
+
+      return list;
     },
   });
 
@@ -66,11 +75,20 @@ const DashboardPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("approvals")
-        .select("*")
+        .select("*, documents(institute_id)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data as ApprovalRow[]) ?? [];
+      const list = (data as any[]) ?? [];
+
+      if (userRole !== "Admin" && profile?.institute_id) {
+        return list.filter((a) => {
+          const docObj = Array.isArray(a.documents) ? a.documents[0] : a.documents;
+          return docObj?.institute_id === profile.institute_id;
+        });
+      }
+
+      return list;
     },
   });
 

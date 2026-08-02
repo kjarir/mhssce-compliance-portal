@@ -99,7 +99,14 @@ const DocumentsPage = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data as any[]) ?? [];
+      const list = (data as any[]) ?? [];
+
+      // Filter by institute unless user is Super Admin
+      if (profile?.role !== "Admin" && profile?.institute_id) {
+        return list.filter((doc) => doc.institute_id === profile.institute_id);
+      }
+
+      return list;
     },
   });
 

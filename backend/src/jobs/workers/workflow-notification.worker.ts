@@ -301,7 +301,12 @@ export const processWorkflowNotification = async (data: WorkflowNotificationJobD
     if (email) {
       try {
         const html = buildEmailHtml(title, message, documentName);
-        await sendWorkflowEmail(email, `[AICP] ${title}`, html);
+        await sendWorkflowEmail(email, `[AICP] ${title}`, html, {
+          recipientName: recipient.full_name,
+          badgeText: title.toLowerCase().includes("expir") ? "ACTION REQUIRED" : "COMPLIANCE NOTICE",
+          message,
+          documentName
+        });
         emailsSent++;
       } catch {
         logger.warn({ recipientId: recipient.id }, "Email send failed, in-app notification saved");

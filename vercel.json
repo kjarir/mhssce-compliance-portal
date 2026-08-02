@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "cd frontend/aicp && npm install && npm run build",
+  "outputDirectory": "frontend/aicp/dist",
   "framework": "vite",
   "rewrites": [
     {

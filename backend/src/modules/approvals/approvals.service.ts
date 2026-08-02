@@ -40,8 +40,8 @@ export const approvalsService = {
     let newStep: ApprovalStep;
 
     if (reviewerRole === "HOD") {
-      if (payload.action !== "feedback") {
-        throw new AppError("HOD can only submit feedback, not approve/reject", 403);
+      if (payload.action !== "feedback" && payload.action !== "approve") {
+        throw new AppError("Invalid action for HOD", 403);
       }
       newStep = "HOD Reviewed";
     } else if (reviewerRole === "Principal") {

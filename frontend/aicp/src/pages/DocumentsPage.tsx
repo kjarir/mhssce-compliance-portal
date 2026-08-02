@@ -83,7 +83,8 @@ const DocumentsPage = () => {
     error,
     refetch
   } = useQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", profile?.id, profile?.institute_id],
+    enabled: !!profile,
     queryFn: async () => {
       // Fetch documents with their active renewals
       const { data, error } = await supabase

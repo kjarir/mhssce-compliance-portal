@@ -75,7 +75,8 @@ const ApprovalsPage = () => {
     data: approvals = [],
     isLoading,
   } = useQuery({
-    queryKey: ['approvals'],
+    queryKey: ['approvals', profile?.id, profile?.institute_id],
+    enabled: !!profile,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('approvals')
@@ -101,7 +102,8 @@ const ApprovalsPage = () => {
     data: renewals = [],
     isLoading: isRenewalsLoading,
   } = useQuery({
-    queryKey: ['renewals'],
+    queryKey: ['renewals', profile?.id, profile?.institute_id],
+    enabled: !!profile,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('document_renewals')

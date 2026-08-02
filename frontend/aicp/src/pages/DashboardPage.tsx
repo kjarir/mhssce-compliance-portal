@@ -52,7 +52,8 @@ const DashboardPage = () => {
   const userRole = profile?.role ?? "";
 
   const { data: documents = [], isLoading: docsLoading } = useQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", profile?.id, profile?.institute_id],
+    enabled: !!profile,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
@@ -71,7 +72,8 @@ const DashboardPage = () => {
   });
 
   const { data: approvals = [], isLoading: approvalsLoading } = useQuery({
-    queryKey: ["approvals"],
+    queryKey: ["approvals", profile?.id, profile?.institute_id],
+    enabled: !!profile,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("approvals")

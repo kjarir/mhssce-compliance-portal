@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   FileText,
   AlertTriangle,
